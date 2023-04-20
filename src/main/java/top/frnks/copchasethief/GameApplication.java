@@ -17,17 +17,13 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 public class GameApplication extends Application {
-    // TODO: move finals to GameSettings class
     // TODO: move variables to GameVars class
-    public static final int WINDOW_WIDTH = 800;
-    public static final int WINDOW_HEIGHT = 600;
-    public static final int TIMEOUT = 10;
     public static double time = 0;
     public static long correctCount = 0;
     public static boolean gameOver = false;
     public static boolean timeoutGameOver = false;
     public static boolean catchedGameOver = false;
-    public static char[] charTable = "abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ ".toCharArray();
+    public static final char[] charTable = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
     private static final Random gameRandom = new Random();
     public static final AnchorPane root = new AnchorPane();
     public static final Text targetText = new Text();
@@ -37,7 +33,7 @@ public class GameApplication extends Application {
     public static final Text correctCountText = new Text("0");
     private Parent createMainMenu() {return null;} // TODO: createMainMenu method
     private Parent createMainGame() {
-        root.setPrefSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+        root.setPrefSize(GameSettings.WINDOW_WIDTH, GameSettings.WINDOW_HEIGHT);
 
         root.getChildren().add(targetText);
         targetText.setFont(new Font("Consolas", 36));
@@ -97,7 +93,7 @@ public class GameApplication extends Application {
         timerText.setText(String.format("%.1f", time));
 
         // timeout check
-        if ( (int)time >= TIMEOUT ) {
+        if ( (int)time >= GameSettings.TIMEOUT ) {
             gameOver = true;
             timeoutGameOver = true;
             gameOverText.setVisible(true);
@@ -116,7 +112,7 @@ public class GameApplication extends Application {
     }
 
     private static void setNewString() {
-        targetText.setText(generateRandomString(3, RandomStringType.ALL_LOWERCASE));
+        targetText.setText(generateRandomString(GameSettings.STRING_LENGTH, GameSettings.STRING_TYPE));
         firstCharacterText.setText(targetText.getText().substring(0,1));
     }
 
@@ -127,14 +123,14 @@ public class GameApplication extends Application {
         switch (randomStringType) {
             case ALL_LOWERCASE -> {
                 for ( int i=0 ; i<length ; i++ ) {
-                    int index = gameRandom.nextInt(0, 27);
+                    int index = gameRandom.nextInt(0, 26);
                     char ch = charTable[index];
                     sb.append(ch);
                 }
             }
             case ALL_UPPERCASE -> {
                 for ( int i=0 ; i<length ; i++ ) {
-                    int index = gameRandom.nextInt(27, charTable.length);
+                    int index = gameRandom.nextInt(26, charTable.length);
                     char ch = charTable[index];
                     sb.append(ch);
                 }
