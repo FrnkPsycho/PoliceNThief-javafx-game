@@ -7,7 +7,7 @@ import javafx.scene.shape.Rectangle;
 class Sprite extends Rectangle {
     boolean dead = false;
     final SpriteType type;
-    Pane pane = GameApplication.ROOT;
+    Pane pane = GameApplication.root;
 
     public Sprite(int x, int y, int w, int h, SpriteType type, Color color) {
         super(w, h, color);
