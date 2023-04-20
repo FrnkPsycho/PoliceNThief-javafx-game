@@ -17,27 +17,54 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 public class GameApplication extends Application {
+    // TODO: move finals to GameSettings class
+    // TODO: move variables to GameVars class
     public static final int WINDOW_WIDTH = 800;
     public static final int WINDOW_HEIGHT = 600;
+    public static final int TIMEOUT = 10;
     public static double time = 0;
+    public static long correctCount = 0;
+    public static boolean gameOver = false;
+    public static boolean timeoutGameOver = false;
+    public static boolean catchedGameOver = false;
     public static char[] charTable = "abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ ".toCharArray();
     private static final Random gameRandom = new Random();
     public static final AnchorPane root = new AnchorPane();
-    public static final Text targetText = new Text(generateRandomString(10, RandomStringType.ALL_LOWERCASE));
-    public static final Text firstCharacterText = new Text(targetText.getText().substring(0,1));
-    public static final Text gameoverText = new Text();
-    public static final Text timerText = new Text(String.valueOf(time));
+    public static final Text targetText = new Text();
+    public static final Text firstCharacterText = new Text();
+    public static final Text gameOverText = new Text();
+    public static final Text timerText = new Text();
+    public static final Text correctCountText = new Text("0");
     private Parent createMainMenu() {return null;} // TODO: createMainMenu method
     private Parent createMainGame() {
         root.setPrefSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+
         root.getChildren().add(targetText);
-        root.getChildren().add(firstCharacterText);
         targetText.setFont(new Font("Consolas", 36));
-        firstCharacterText.setFont(new Font("Consolas", 36));
         AnchorPane.setBottomAnchor(targetText, 50.0);
         AnchorPane.setLeftAnchor(targetText, 30.0);
+
+        root.getChildren().add(firstCharacterText);
+        firstCharacterText.setFont(new Font("Consolas", 36));
         AnchorPane.setBottomAnchor(firstCharacterText, 50.0);
         AnchorPane.setLeftAnchor(firstCharacterText, 30.0);
+
+        root.getChildren().add(timerText);
+        timerText.setFont(new Font("Noto Sans", 40));
+        AnchorPane.setTopAnchor(timerText, 20.0);
+        AnchorPane.setLeftAnchor(timerText, 10.0);
+
+        root.getChildren().add(gameOverText);
+        gameOverText.setVisible(false);
+        gameOverText.setFont(new Font("Noto Sans", 36));
+        AnchorPane.setTopAnchor(gameOverText, 270.0);
+        AnchorPane.setLeftAnchor(gameOverText, 100.0);
+
+        root.getChildren().add(correctCountText);
+
+        setNewString();
+
+
 
         AnimationTimer timer = new AnimationTimer() {
             long last = 0;
@@ -54,20 +81,45 @@ public class GameApplication extends Application {
         return root;
     }
 
+
+
     private List<Sprite> sprites() {
         return root.getChildren().stream().map(node -> (Sprite)node).collect(Collectors.toList());
     }
 
     private void update() {
-        time += 1;
-        if ( !targetText.getText().isEmpty() ) {
-            String firstChar = targetText.getText().substring(0,1);
-            firstCharacterText.setText(firstChar);
-        } else {
-            firstCharacterText.setText("");
+        if ( gameOver ) return;
 
+        // game runs in 60fps, so timer increases approx. 0.016667 per frame
+        time += 0.016667;
+
+        // update timerText
+        timerText.setText(String.format("%.1f", time));
+
+        // timeout check
+        if ( (int)time >= TIMEOUT ) {
+            gameOver = true;
+            timeoutGameOver = true;
+            gameOverText.setVisible(true);
+            setGameOverString();
         }
+
+        // TODO: catch check
+
     }
+
+    private static void setGameOverString() {
+        // TODO: localization texts
+        if ( timeoutGameOver ) gameOverText.setText("Times Up! The thief has gone away!");
+        else if ( catchedGameOver ) gameOverText.setText("Congrats! The thief has been caught!"); // TODO: player plays as thief
+        else  gameOverText.setText("I don't know what's going on, but the game is over...");
+    }
+
+    private static void setNewString() {
+        targetText.setText(generateRandomString(3, RandomStringType.ALL_LOWERCASE));
+        firstCharacterText.setText(targetText.getText().substring(0,1));
+    }
+
 
     static String generateRandomString(int length, RandomStringType randomStringType) {
 
@@ -117,6 +169,13 @@ public class GameApplication extends Application {
     }
 
     static void inputAction(String input) {
+        if (gameOver) {
+            if ( input.equals("r") ) {
+                // TODO: reset the game
+            }
+            return;
+        }
+
         String targetString = targetText.getText();
         String firstCharacter = String.valueOf(targetString.charAt(0));
         if ( input.equals(firstCharacter) ) {
@@ -132,8 +191,17 @@ public class GameApplication extends Application {
     }
 
     static void correctInputAction() {
-        firstCharacterText.setFill(Color.BLACK);
+        correctCount += 1;
+        correctCountText.setText(String.valueOf(correctCount));
+
         targetText.setText(targetText.getText().substring(1));
+        if ( !targetText.getText().isEmpty() ) {
+            String firstChar = targetText.getText().substring(0,1);
+            firstCharacterText.setText(firstChar);
+            firstCharacterText.setFill(Color.BLACK);
+        } else {
+            setNewString();
+        }
     }
 
     public static void main(String[] args) {
