@@ -21,37 +21,44 @@ public class GameMap {
         int points = 0;
         String[] mapShape = new String[] { "" };
 
+        int x=0, y=0;
         if (type == GameMapShapeType.Rectangle) {
             points = GameMapShapes.RECTANGLE_POINTS;
             mapShape = GameMapShapes.RECTANGLE;
-        };
-//        for (int i = 0; i < mapShape.length; i++ ) {
-//            for ( int j = 0 ; j < mapShape[i].length(); j++ ) {
-//                if ( mapShape[i].charAt(j) == '#') {
-//                    var p = new Point2D(j * GameSettings.SPRITE_SIZE, i * GameSettings.SPRITE_SIZE);
-//                    // debug
-//                    System.out.println(p);
-//                    mapPoints.add(p);
-//                }
-//            }
-//        }
+            x = GameMapShapes.RECTANGLE_START[0][0];
+            y = GameMapShapes.RECTANGLE_START[0][1];
+        } else if ( type == GameMapShapeType.Hexagon ){
+            points = GameMapShapes.HEXAGON_POINTS;
+            mapShape = GameMapShapes.HEXAGON;
+            x = GameMapShapes.HEXAGON_START[0][0];
+            y = GameMapShapes.HEXAGON_START[0][1];
+        }
 
-        int i=0, j=0;
-        for ( int acc=0 ; acc < points; acc++ ) {
-            char mark = mapShape[i].charAt(j);
-            var p = new Point2D(j * GameSettings.SPRITE_SIZE, i * GameSettings.SPRITE_SIZE);
+
+        mapPoints.add(new Point2D(x*GameSettings.SPRITE_SIZE, y*GameSettings.SPRITE_SIZE));
+        for ( int acc=1 ; acc < points; acc++ ) {
+            char mark = mapShape[y].charAt(x);
             switch (mark) {
                 // TODO: make map point contains corner data?
-                case 'D' -> j++;
-                case 'S' -> i++;
-                case 'A' -> j--;
-                case 'W' -> i--;
+                case 'D' -> x++;
+                case 'S' -> y++;
+                case 'A' -> x--;
+                case 'W' -> y--;
+                case 'Q' -> { x--; y--;}
+                case 'E' -> { x++; y--;}
+                case 'C' -> { x++; y++;}
+                case 'Z' -> { x--; y++;}
             }
+            if ( y<0 ) y = 0;
+            if ( x<0 ) x = 0;
+            if ( y>mapShape.length-1) y = mapShape.length-1;
+            if ( x>mapShape[y].length()-1) x = mapShape[y].length()-1;
+            var p = new Point2D(x * GameSettings.SPRITE_SIZE, y * GameSettings.SPRITE_SIZE);
+            LOGGER.info(p.toString());
             mapPoints.add(p);
         }
 
-        for ( int k = 0 ; k < mapPoints.size(); k++ ) {
-            Point2D p = mapPoints.get(k);
+        for (Point2D p : mapPoints) {
             Rectangle roadShape = new Rectangle(p.getX(), p.getY(), GameSettings.SPRITE_SIZE, GameSettings.SPRITE_SIZE);
             roadShape.setFill(Color.GRAY);
             roadShape.setOpacity(80.0);

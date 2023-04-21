@@ -80,6 +80,7 @@ public class GameApplication extends Application {
 
 
         GameMap.generateGameMap(GameMapShapeType.Rectangle);
+//        GameMap.generateGameMap(GameMapShapeType.Hexagon);
         root.getChildren().add(GameMap.mapPane);
         AnchorPane.setTopAnchor(GameMap.mapPane, 200.0);
         AnchorPane.setLeftAnchor(GameMap.mapPane, 112.0);
