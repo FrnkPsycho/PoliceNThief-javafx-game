@@ -17,9 +17,11 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
+import java.util.logging.Logger;
 
 public class GameApplication extends Application {
     // TODO: move variables to GameVars class
+    public static final Logger LOGGER = Logger.getGlobal();
     public static double time = 0;
     public static final char[] charTable = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
     private static final Random gameRandom = new Random();
@@ -30,9 +32,9 @@ public class GameApplication extends Application {
     public static final Text firstCharacterText = new Text();
     public static final Text gameOverText = new Text();
     public static final Text timerText = new Text();
-    public static final Text correctCountText = new Text("Correct: 0"); // TODO: make this translatable
-    public static final Text wrongCountText = new Text("Wrong: 0"); // TODO: make this translatable
-    public static final Text cpsText = new Text("CPS: "); // TODO: make this translatable
+    public static final Text correctCountText = new Text();
+    public static final Text wrongCountText = new Text();
+    public static final Text cpsText = new Text();
     private Parent createMainMenu() {return null;} // TODO: createMainMenu method
     private Parent createMainGame() {
         root.setPrefSize(GameSettings.WINDOW_WIDTH, GameSettings.WINDOW_HEIGHT);
@@ -53,20 +55,22 @@ public class GameApplication extends Application {
         AnchorPane.setLeftAnchor(timerText, 10.0);
 
         root.getChildren().add(correctCountText);
+        correctCountText.setText("Correct: " + GameVars.correctCount); // TODO: make this translatable
         correctCountText.setFont(counterFont);
         AnchorPane.setTopAnchor(correctCountText, 80.0);
         AnchorPane.setLeftAnchor(correctCountText, 10.0);
 
-        root.getChildren().add(cpsText);
-        cpsText.setFont(counterFont);
-        AnchorPane.setTopAnchor(cpsText,20.0);
-        AnchorPane.setRightAnchor(cpsText, 40.0);
-
-
         root.getChildren().add(wrongCountText);
+        wrongCountText.setText("Wrong: " + GameVars.wrongCount); // TODO: make this translatable
         wrongCountText.setFont(counterFont);
         AnchorPane.setTopAnchor(wrongCountText, 140.0);
         AnchorPane.setLeftAnchor(wrongCountText, 10.0);
+
+        root.getChildren().add(cpsText);
+        cpsText.setText("CPS: " + String.format("%.1f", GameVars.cps)); // TODO: make this translatable
+        cpsText.setFont(counterFont);
+        AnchorPane.setTopAnchor(cpsText,20.0);
+        AnchorPane.setRightAnchor(cpsText, 40.0);
 
         root.getChildren().add(gameOverText);
         gameOverText.setVisible(false);
@@ -95,8 +99,6 @@ public class GameApplication extends Application {
 
         return root;
     }
-
-
 
     private List<Sprite> sprites() {
         return root.getChildren().stream().map(node -> (Sprite)node).collect(Collectors.toList());

@@ -18,6 +18,6 @@ class Sprite extends Rectangle {
     }
 
     public void moveForward() {
-        // TODO set sprite to next map node?
+        // TODO: set sprite to next map node?
     }
 }
