@@ -12,6 +12,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import top.frnks.copchasethief.type.GameMapShapeType;
 import top.frnks.copchasethief.type.RandomStringType;
+import top.frnks.copchasethief.type.SpriteType;
 
 import java.io.IOException;
 import java.util.List;
@@ -20,9 +21,9 @@ import java.util.stream.Collectors;
 import java.util.logging.Logger;
 
 public class GameApplication extends Application {
-    // TODO: move variables to GameVars class
     public static final Logger LOGGER = Logger.getGlobal();
-    public static double time = 0;
+    public static double secondTimer = 0;
+    public static double keepTimer = 0;
     public static final char[] charTable = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
     private static final Random gameRandom = new Random();
     public static final AnchorPane root = new AnchorPane();
@@ -72,18 +73,17 @@ public class GameApplication extends Application {
         AnchorPane.setTopAnchor(cpsText,20.0);
         AnchorPane.setRightAnchor(cpsText, 40.0);
 
-        root.getChildren().add(gameOverText);
-        gameOverText.setVisible(false);
-        gameOverText.setFont(counterFont);
-        AnchorPane.setTopAnchor(gameOverText, 270.0);
-        AnchorPane.setLeftAnchor(gameOverText, 100.0);
-
-
         GameMap.generateGameMap(GameMapShapeType.Rectangle);
 //        GameMap.generateGameMap(GameMapShapeType.Hexagon);
         root.getChildren().add(GameMap.mapPane);
         AnchorPane.setTopAnchor(GameMap.mapPane, 200.0);
         AnchorPane.setLeftAnchor(GameMap.mapPane, 112.0);
+
+        root.getChildren().add(gameOverText);
+        gameOverText.setVisible(false);
+        gameOverText.setFont(counterFont);
+        AnchorPane.setTopAnchor(gameOverText, 270.0);
+        AnchorPane.setLeftAnchor(gameOverText, 100.0);
 
         setNewString();
         AnimationTimer timer = new AnimationTimer() {
@@ -109,25 +109,57 @@ public class GameApplication extends Application {
         if ( GameVars.gameOver ) return;
 
         // game runs in 60fps, so timer increases approx. 0.016667 per frame
-        time += 0.016667;
+        secondTimer += 0.016667;
+        keepTimer += 0.016667;
+
+        // if reach a second, clear secondTimer, add one second to totalTime
+        if ( secondTimer > 1 ) {
+            secondTimer = 0;
+            GameVars.totalTimeSeconds += 1;
+
+            // enemy auto forward/backward
+            // TODO: player act as thief
+            // TODO: customizable speed
+            if ( gameRandom.nextInt(1) == 0 ) GameMap.thief.moveForward();
+            // TODO: prevent thief from catching up police itself
+//            if ( Math.abs(GameMap.thief.mapIndex - GameMap.police.mapIndex) < 6 ) {
+//                // TODO: Strange behavior of thief
+//                GameMap.thief.takeTurn();
+//                if ( GameSettings.PLAYER_SPRITE == SpriteType.Police ) {
+//                    GameMap.thief.moveForward();
+//                    GameMap.thief.moveForward();
+//                } else {
+//                    GameMap.police.moveForward();
+//                    GameMap.police.moveForward();
+//                }
+//            }
+        }
+
+
 
         // update timerText
-        timerText.setText(String.format("%.1f", time));
+        timerText.setText(String.format("%.1f", keepTimer));
 
         // calculate CPS ( Character Per Second )
-        GameVars.cps = GameVars.correctCount / time;
+        GameVars.cps = GameVars.correctCount / keepTimer;
         cpsText.setText("CPS: " + String.format("%.1f", GameVars.cps));
 
+
         // timeout check
-        if ( (int)time >= GameSettings.TIMEOUT ) {
+        if ( GameVars.totalTimeSeconds >= GameSettings.TIMEOUT ) {
             GameVars.gameOver = true;
             GameVars.timeoutGameOver = true;
             gameOverText.setVisible(true);
             setGameOverString();
         }
 
-        // TODO: catch check
-
+        if ( GameMap.police.mapIndex == GameMap.thief.mapIndex ) {
+            GameMap.police.setFill(Color.GREEN);
+            GameVars.gameOver = true;
+            GameVars.caughtGameOver = true;
+            gameOverText.setVisible(true);
+            setGameOverString();
+        }
     }
 
     private static void setGameOverString() {
@@ -224,6 +256,9 @@ public class GameApplication extends Application {
             firstCharacterText.setText(firstChar);
             firstCharacterText.setFill(Color.BLACK);
         } else {
+            // TODO: player speed relates to CPS.
+            if ( GameSettings.PLAYER_SPRITE == SpriteType.Police ) GameMap.police.moveForward();
+            else GameMap.thief.moveForward();
             setNewString();
         }
     }

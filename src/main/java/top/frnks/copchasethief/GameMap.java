@@ -16,6 +16,8 @@ public class GameMap {
     public static final AnchorPane mapPane = new AnchorPane();
     public static final int BASE = GameSettings.SPRITE_SIZE;
     public static List<Point2D> mapPoints = new ArrayList<>();
+    public static Sprite police = null;
+    public static Sprite thief = null;
 
     public static void generateGameMap(GameMapShapeType type) {
         LOGGER.info("Initializing GameMap...");
@@ -77,12 +79,21 @@ public class GameMap {
             mapPane.getChildren().add(roadShape);
         }
 
-        Sprite police = new Sprite(policeStartX*BASE, policeStartY*BASE, BASE, BASE, SpriteType.Police, Color.BLUE);
-        Sprite thief = new Sprite(thiefStartX*BASE, thiefStartY*BASE, BASE, BASE, SpriteType.Thief, Color.RED);
-        mapPane.getChildren().add(police);
+        int thiefIndex = findSpriteMapIndex(thiefStartX*BASE, thiefStartY*BASE);
+        thief = new Sprite(thiefStartX*BASE, thiefStartY*BASE, BASE, BASE, thiefIndex, SpriteType.Thief, Color.RED);
+        police = new Sprite(policeStartX*BASE, policeStartY*BASE, BASE, BASE,0, SpriteType.Police, Color.BLUE);
         mapPane.getChildren().add(thief);
+        mapPane.getChildren().add(police);
 
         LOGGER.info("GameMap Initialized");
+    }
+
+    static int findSpriteMapIndex(int x, int y) {
+        for ( int i=0; i<mapPoints.size(); i++ ) {
+            var p = mapPoints.get(i);
+            if ( x == p.getX() && y == p.getY() ) return i;
+        }
+        return 0;
     }
 
 }
