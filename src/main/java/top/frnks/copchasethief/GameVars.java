@@ -8,4 +8,6 @@ public class GameVars {
     public static boolean gameOver = false;
     public static boolean timeoutGameOver = false;
     public static boolean caughtGameOver = false;
+    public static int mapLength = 0;
+
 }

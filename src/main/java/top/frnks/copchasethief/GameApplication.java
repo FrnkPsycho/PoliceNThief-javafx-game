@@ -73,7 +73,10 @@ public class GameApplication extends Application {
         AnchorPane.setTopAnchor(cpsText,20.0);
         AnchorPane.setRightAnchor(cpsText, 40.0);
 
-        GameMap.generateGameMap(GameMapShapeType.Rectangle);
+        // TODO: reconstruct map shapes
+        GameMap.generateGameMap(GameSettings.MAP_SHAPE_TYPE);
+        if ( GameSettings.MAP_SHAPE_TYPE == GameMapShapeType.Rectangle) GameVars.mapLength = GameMapShapes.RECTANGLE_POINTS;
+        //
 //        GameMap.generateGameMap(GameMapShapeType.Hexagon);
         root.getChildren().add(GameMap.mapPane);
         AnchorPane.setTopAnchor(GameMap.mapPane, 200.0);
@@ -121,18 +124,20 @@ public class GameApplication extends Application {
             // TODO: player act as thief
             // TODO: customizable speed
             if ( gameRandom.nextInt(1) == 0 ) GameMap.thief.moveForward();
-            // TODO: prevent thief from catching up police itself
-//            if ( Math.abs(GameMap.thief.mapIndex - GameMap.police.mapIndex) < 6 ) {
-//                // TODO: Strange behavior of thief
-//                GameMap.thief.takeTurn();
-//                if ( GameSettings.PLAYER_SPRITE == SpriteType.Police ) {
-//                    GameMap.thief.moveForward();
-//                    GameMap.thief.moveForward();
-//                } else {
-//                    GameMap.police.moveForward();
-//                    GameMap.police.moveForward();
-//                }
-//            }
+
+
+
+            if ( calculateNearestDistance(GameMap.police.mapIndex, GameMap.thief.mapIndex, GameVars.mapLength) < 4 ) {
+                // TODO: Strange behavior of thief if police nearly catch up
+                GameMap.thief.takeTurn();
+                if ( GameSettings.PLAYER_SPRITE == SpriteType.Police ) {
+                    GameMap.thief.moveForward();
+                    GameMap.thief.moveForward();
+                } else {
+                    GameMap.police.moveForward();
+                    GameMap.police.moveForward();
+                }
+            }
         }
 
 
@@ -160,6 +165,12 @@ public class GameApplication extends Application {
             gameOverText.setVisible(true);
             setGameOverString();
         }
+    }
+
+    private static int calculateNearestDistance(int index1, int index2, int mapLength) {
+        int a = Math.abs(index1 + mapLength - index2);
+        int b = Math.abs(index2 - index1);
+        return Math.min(a, b);
     }
 
     private static void setGameOverString() {
