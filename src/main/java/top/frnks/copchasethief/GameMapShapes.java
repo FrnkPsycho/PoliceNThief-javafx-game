@@ -18,7 +18,7 @@ public class GameMapShapes {
     // Set the start point of police and thief, 0->police, 1->thief
     public static final int[][] RECTANGLE_START = new int[][] {
             {0, 0},
-            {0, 8},
+            {8, 0},
     };
 
     // TODO: translate other maps to CMML.
@@ -31,8 +31,8 @@ public class GameMapShapes {
     };
     public static final int HEXAGON_POINTS = 12;
     public static final int[][] HEXAGON_START = new int[][] {
-            {2, 0},
-            {2, 6},
+            {0, 2},
+            {6, 2},
     };
 
 }
