@@ -3,6 +3,7 @@ package top.frnks.copchasethief;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import top.frnks.copchasethief.type.SpriteType;
 
 class Sprite extends Rectangle {
     boolean dead = false;

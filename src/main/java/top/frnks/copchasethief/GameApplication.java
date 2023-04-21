@@ -10,6 +10,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import top.frnks.copchasethief.type.GameMapShapeType;
+import top.frnks.copchasethief.type.RandomStringType;
 
 import java.io.IOException;
 import java.util.List;
@@ -19,49 +21,66 @@ import java.util.stream.Collectors;
 public class GameApplication extends Application {
     // TODO: move variables to GameVars class
     public static double time = 0;
-    public static long correctCount = 0;
-    public static boolean gameOver = false;
-    public static boolean timeoutGameOver = false;
-    public static boolean catchedGameOver = false;
     public static final char[] charTable = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
     private static final Random gameRandom = new Random();
     public static final AnchorPane root = new AnchorPane();
+    public static final Font counterFont = new Font("Noto Sans", 40);
+    public static final Font stringFont = new Font("Consolas", 40);
     public static final Text targetText = new Text();
     public static final Text firstCharacterText = new Text();
     public static final Text gameOverText = new Text();
     public static final Text timerText = new Text();
-    public static final Text correctCountText = new Text("0");
+    public static final Text correctCountText = new Text("Correct: 0"); // TODO: make this translatable
+    public static final Text wrongCountText = new Text("Wrong: 0"); // TODO: make this translatable
+    public static final Text cpsText = new Text("CPS: "); // TODO: make this translatable
     private Parent createMainMenu() {return null;} // TODO: createMainMenu method
     private Parent createMainGame() {
         root.setPrefSize(GameSettings.WINDOW_WIDTH, GameSettings.WINDOW_HEIGHT);
 
         root.getChildren().add(targetText);
-        targetText.setFont(new Font("Consolas", 36));
+        targetText.setFont(stringFont);
         AnchorPane.setBottomAnchor(targetText, 50.0);
         AnchorPane.setLeftAnchor(targetText, 30.0);
 
         root.getChildren().add(firstCharacterText);
-        firstCharacterText.setFont(new Font("Consolas", 36));
+        firstCharacterText.setFont(stringFont);
         AnchorPane.setBottomAnchor(firstCharacterText, 50.0);
         AnchorPane.setLeftAnchor(firstCharacterText, 30.0);
 
         root.getChildren().add(timerText);
-        timerText.setFont(new Font("Noto Sans", 40));
+        timerText.setFont(counterFont);
         AnchorPane.setTopAnchor(timerText, 20.0);
         AnchorPane.setLeftAnchor(timerText, 10.0);
 
+        root.getChildren().add(correctCountText);
+        correctCountText.setFont(counterFont);
+        AnchorPane.setTopAnchor(correctCountText, 80.0);
+        AnchorPane.setLeftAnchor(correctCountText, 10.0);
+
+        root.getChildren().add(cpsText);
+        cpsText.setFont(counterFont);
+        AnchorPane.setTopAnchor(cpsText,20.0);
+        AnchorPane.setRightAnchor(cpsText, 40.0);
+
+
+        root.getChildren().add(wrongCountText);
+        wrongCountText.setFont(counterFont);
+        AnchorPane.setTopAnchor(wrongCountText, 140.0);
+        AnchorPane.setLeftAnchor(wrongCountText, 10.0);
+
         root.getChildren().add(gameOverText);
         gameOverText.setVisible(false);
-        gameOverText.setFont(new Font("Noto Sans", 36));
+        gameOverText.setFont(counterFont);
         AnchorPane.setTopAnchor(gameOverText, 270.0);
         AnchorPane.setLeftAnchor(gameOverText, 100.0);
 
-        root.getChildren().add(correctCountText);
+
+        GameMap.generateGameMap(GameMapShapeType.Rectangle);
+        root.getChildren().add(GameMap.mapPane);
+        AnchorPane.setTopAnchor(GameMap.mapPane, 200.0);
+        AnchorPane.setLeftAnchor(GameMap.mapPane, 112.0);
 
         setNewString();
-
-
-
         AnimationTimer timer = new AnimationTimer() {
             long last = 0;
             @Override
@@ -84,7 +103,7 @@ public class GameApplication extends Application {
     }
 
     private void update() {
-        if ( gameOver ) return;
+        if ( GameVars.gameOver ) return;
 
         // game runs in 60fps, so timer increases approx. 0.016667 per frame
         time += 0.016667;
@@ -92,10 +111,14 @@ public class GameApplication extends Application {
         // update timerText
         timerText.setText(String.format("%.1f", time));
 
+        // calculate CPS ( Character Per Second )
+        GameVars.cps = GameVars.correctCount / time;
+        cpsText.setText("CPS: " + String.format("%.1f", GameVars.cps));
+
         // timeout check
         if ( (int)time >= GameSettings.TIMEOUT ) {
-            gameOver = true;
-            timeoutGameOver = true;
+            GameVars.gameOver = true;
+            GameVars.timeoutGameOver = true;
             gameOverText.setVisible(true);
             setGameOverString();
         }
@@ -105,9 +128,9 @@ public class GameApplication extends Application {
     }
 
     private static void setGameOverString() {
-        // TODO: localization texts
-        if ( timeoutGameOver ) gameOverText.setText("Times Up! The thief has gone away!");
-        else if ( catchedGameOver ) gameOverText.setText("Congrats! The thief has been caught!"); // TODO: player plays as thief
+        // TODO: make them translatable
+        if ( GameVars.timeoutGameOver ) gameOverText.setText("Times Up! The thief has gone away!");
+        else if ( GameVars.caughtGameOver) gameOverText.setText("Congrats! The thief has been caught!"); // TODO: player plays as thief
         else  gameOverText.setText("I don't know what's going on, but the game is over...");
     }
 
@@ -115,7 +138,6 @@ public class GameApplication extends Application {
         targetText.setText(generateRandomString(GameSettings.STRING_LENGTH, GameSettings.STRING_TYPE));
         firstCharacterText.setText(targetText.getText().substring(0,1));
     }
-
 
     static String generateRandomString(int length, RandomStringType randomStringType) {
 
@@ -165,7 +187,7 @@ public class GameApplication extends Application {
     }
 
     static void inputAction(String input) {
-        if (gameOver) {
+        if (GameVars.gameOver) {
             if ( input.equals("r") ) {
                 // TODO: reset the game
             }
@@ -182,13 +204,16 @@ public class GameApplication extends Application {
     }
 
     static void wrongInputAction() {
+        GameVars.wrongCount += 1;
+        wrongCountText.setText("Wrong: " + GameVars.wrongCount);  // TODO: make this translatable
+
         firstCharacterText.setFill(Color.RED);
         // TODO: play sound if input is wrong
     }
 
     static void correctInputAction() {
-        correctCount += 1;
-        correctCountText.setText(String.valueOf(correctCount));
+        GameVars.correctCount += 1;
+        correctCountText.setText("Correct: " + GameVars.correctCount); // TODO: make this translatable
 
         targetText.setText(targetText.getText().substring(1));
         if ( !targetText.getText().isEmpty() ) {
