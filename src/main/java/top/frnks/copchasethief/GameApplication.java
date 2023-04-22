@@ -123,22 +123,26 @@ public class GameApplication extends Application {
             // enemy auto forward/backward
             // TODO: player act as thief
             // TODO: customizable speed
-            if ( gameRandom.nextInt(1) == 0 ) GameMap.thief.moveForward();
+//            if ( gameRandom.nextInt(2) == 0 ) GameMap.thief.moveForward(1);
+            GameMap.thief.setBetterDirection();
+            GameMap.police.setBetterDirection();
+            GameMap.thief.moveForward(1);
 
-
-
-            if ( calculateNearestDistance(GameMap.police.mapIndex, GameMap.thief.mapIndex, GameVars.mapLength) < 4 ) {
-                // TODO: Strange behavior of thief if police nearly catch up
-                GameMap.thief.takeTurn();
-                if ( GameSettings.PLAYER_SPRITE == SpriteType.Police ) {
-                    GameMap.thief.moveForward();
-                    GameMap.thief.moveForward();
-                } else {
-                    GameMap.police.moveForward();
-                    GameMap.police.moveForward();
-                }
-            }
         }
+//        if ( calculateNearestDistance(GameMap.police.mapIndex, GameMap.thief.mapIndex, GameVars.mapLength) < 4 ) {
+//            // TODO: Strange behavior of thief if police nearly catch up
+//            GameMap.thief.takeTurn();
+//            if ( GameSettings.PLAYER_SPRITE == SpriteType.Police ) {
+//                GameMap.thief.moveForward(2);
+//            }
+//        }
+//        if ( GameMap.thief.direction == GameMap.police.direction) {
+//            if ( calculateNearestDistance(GameVars.mapLength) < 4 ) {
+//                GameMap.thief.direction = !GameMap.police.direction;
+//                GameMap.thief.moveForward(2);
+//                GameMap.police.direction = GameMap.thief.direction;
+//            }
+//        }
 
 
 
@@ -167,11 +171,8 @@ public class GameApplication extends Application {
         }
     }
 
-    private static int calculateNearestDistance(int index1, int index2, int mapLength) {
-        int a = Math.abs(index1 + mapLength - index2);
-        int b = Math.abs(index2 - index1);
-        return Math.min(a, b);
-    }
+
+
 
     private static void setGameOverString() {
         // TODO: make them translatable
@@ -268,8 +269,8 @@ public class GameApplication extends Application {
             firstCharacterText.setFill(Color.BLACK);
         } else {
             // TODO: player speed relates to CPS.
-            if ( GameSettings.PLAYER_SPRITE == SpriteType.Police ) GameMap.police.moveForward();
-            else GameMap.thief.moveForward();
+            if ( GameSettings.PLAYER_SPRITE == SpriteType.Police ) GameMap.police.moveForward(1);
+            else GameMap.thief.moveForward(1);
             setNewString();
         }
     }

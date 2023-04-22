@@ -1,12 +1,11 @@
 package top.frnks.copchasethief;
 
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import top.frnks.copchasethief.type.SpriteType;
 
 public class Sprite extends Rectangle {
-    boolean reverse = false;
+    boolean direction = false; // false: clockwise; true: reversed
     int mapIndex;
     final SpriteType type;
     final int BASE = GameSettings.SPRITE_SIZE;
@@ -19,19 +18,51 @@ public class Sprite extends Rectangle {
         setTranslateY(y);
     }
 
-    public void moveForward() {
-        if ( reverse ) mapIndex = (mapIndex - 1);
-        else mapIndex = (mapIndex + 1);
+    public void moveForward(int step) {
+        int nextIndex = 0;
+//        if ( type == SpriteType.Thief ) {
+//            if ( calculateNearestDistance(GameVars.mapLength) < 4 ) {
+//                takeTurn();
+//            }
+//        }
 
-        if ( mapIndex < 0 ) mapIndex += GameMap.mapPoints.size();
-        else if (mapIndex > GameMap.mapPoints.size()-1) mapIndex -= GameMap.mapPoints.size();
+        if (direction) nextIndex = (mapIndex - step);
+        else nextIndex = (mapIndex + step);
 
-        var p = GameMap.mapPoints.get(mapIndex);
+        if ( nextIndex < 0 ) nextIndex = GameMap.mapPoints.size()-1;
+        else if (nextIndex > GameMap.mapPoints.size()-1) nextIndex = 0;
+
+        var p = GameMap.mapPoints.get(nextIndex);
         setTranslateX(p.getX());
         setTranslateY(p.getY());
+        mapIndex = nextIndex;
     }
 
     public void takeTurn() {
-        reverse = !reverse;
+        direction = !direction;
     }
+
+    public void setBetterDirection() {
+        int forwardDist = 0;
+        int reverseDist = 0;
+        if ( type == SpriteType.Thief ) {
+             if ( !direction ) {
+                 forwardDist = Math.abs(GameMap.police.mapIndex + GameVars.mapLength - GameMap.thief.mapIndex);
+                 reverseDist = GameVars.mapLength - forwardDist;
+                 if ( reverseDist > forwardDist ) direction = true;
+             } else {
+                 forwardDist = Math.abs(GameMap.thief.mapIndex - GameMap.police.mapIndex);
+                 reverseDist = GameVars.mapLength - forwardDist;
+                 if ( reverseDist > forwardDist ) direction = false;
+             }
+        }
+    }
+
+    static int calculateNearestDistance(int mapLength) {
+        int a = Math.abs(GameMap.police.mapIndex + mapLength - GameMap.thief.mapIndex);
+        int b = Math.abs(GameMap.thief.mapIndex - GameMap.police.mapIndex);
+        return Math.min(a, b);
+    }
+
+
 }
