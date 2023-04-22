@@ -10,4 +10,6 @@ public class GameVars {
     public static boolean caughtGameOver = false;
     public static int mapLength = 0;
 
+    public static String targetString = "";
+    public static String finishedString = "";
 }

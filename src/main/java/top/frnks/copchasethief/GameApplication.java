@@ -5,10 +5,14 @@ import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Polygon;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import top.frnks.copchasethief.type.GameMapShapeType;
 import top.frnks.copchasethief.type.RandomStringType;
@@ -27,28 +31,52 @@ public class GameApplication extends Application {
     public static final char[] charTable = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
     private static final Random gameRandom = new Random();
     public static final AnchorPane root = new AnchorPane();
+    public static final FlowPane stringPane = new FlowPane();
     public static final Font counterFont = new Font("Noto Sans", 40);
     public static final Font stringFont = new Font("Consolas", 40);
     public static final Text targetText = new Text();
     public static final Text firstCharacterText = new Text();
+    public static final Text finishedText = new Text();
     public static final Text gameOverText = new Text();
     public static final Text timerText = new Text();
     public static final Text correctCountText = new Text();
     public static final Text wrongCountText = new Text();
     public static final Text cpsText = new Text();
+    public static final Rectangle cursor = new Rectangle(24, 2);
+
     private Parent createMainMenu() {return null;} // TODO: createMainMenu method
     private Parent createMainGame() {
         root.setPrefSize(GameSettings.WINDOW_WIDTH, GameSettings.WINDOW_HEIGHT);
 
+        root.getChildren().add(finishedText);
+        finishedText.setFont(stringFont);
+        finishedText.setFill(Color.GRAY);
+        finishedText.setTextAlignment(TextAlignment.RIGHT);
+        AnchorPane.setBottomAnchor(finishedText, 50.0);
+        AnchorPane.setRightAnchor(finishedText, 420.0);
+
         root.getChildren().add(targetText);
         targetText.setFont(stringFont);
         AnchorPane.setBottomAnchor(targetText, 50.0);
-        AnchorPane.setLeftAnchor(targetText, 30.0);
+        AnchorPane.setLeftAnchor(targetText, 380.0);
 
         root.getChildren().add(firstCharacterText);
         firstCharacterText.setFont(stringFont);
         AnchorPane.setBottomAnchor(firstCharacterText, 50.0);
-        AnchorPane.setLeftAnchor(firstCharacterText, 30.0);
+        AnchorPane.setLeftAnchor(firstCharacterText, 380.0);
+
+        root.getChildren().add(cursor);
+        AnchorPane.setBottomAnchor(cursor, 45.0);
+        AnchorPane.setLeftAnchor(cursor, 380.0);
+
+//        root.getChildren().add(stringPane);
+//        stringPane.setPrefWrapLength(root.getPrefWidth());
+//        stringPane.getChildren().add(finishedText);
+//        Rectangle rect = new Rectangle();
+//        rect.heightProperty().bind(stringPane.heightProperty());
+//        rect.widthProperty().bind(stringPane.widthProperty());
+//        rect.setWidth(rect.getWidth() - 200);
+
 
         root.getChildren().add(timerText);
         timerText.setFont(counterFont);
@@ -124,26 +152,9 @@ public class GameApplication extends Application {
             GameMap.thief.setBetterDirection();
             // TODO: player act as thief
             // TODO: customizable speed
-            if ( gameRandom.nextInt(4) == 0 ) GameMap.thief.moveForward(1);
+            if ( gameRandom.nextInt(3) == 0 ) GameMap.thief.moveForward(1);
 
-//            GameMap.thief.moveForward(1);
         }
-//        GameMap.police.setBetterDirection();
-//        if ( calculateNearestDistance(GameMap.police.mapIndex, GameMap.thief.mapIndex, GameVars.mapLength) < 4 ) {
-//            // TODO: Strange behavior of thief if police nearly catch up
-//            GameMap.thief.takeTurn();
-//            if ( GameSettings.PLAYER_SPRITE == SpriteType.Police ) {
-//                GameMap.thief.moveForward(2);
-//            }
-//        }
-//        if ( GameMap.thief.direction == GameMap.police.direction) {
-//            if ( calculateNearestDistance(GameVars.mapLength) < 4 ) {
-//                GameMap.thief.direction = !GameMap.police.direction;
-//                GameMap.thief.moveForward(2);
-//                GameMap.police.direction = GameMap.thief.direction;
-//            }
-//        }
-
 
 
         // update timerText
@@ -162,6 +173,7 @@ public class GameApplication extends Application {
             setGameOverString();
         }
 
+        // catch check
         if ( GameMap.police.mapIndex == GameMap.thief.mapIndex ) {
             GameMap.police.setFill(Color.GREEN);
             GameVars.gameOver = true;
@@ -172,8 +184,6 @@ public class GameApplication extends Application {
     }
 
 
-
-
     private static void setGameOverString() {
         // TODO: make them translatable
         if ( GameVars.timeoutGameOver ) gameOverText.setText("Times Up! The thief has gone away!");
@@ -182,8 +192,11 @@ public class GameApplication extends Application {
     }
 
     private static void setNewString() {
-        targetText.setText(generateRandomString(GameSettings.STRING_LENGTH, GameSettings.STRING_TYPE));
+        GameVars.targetString = generateRandomString(GameSettings.STRING_LENGTH, GameSettings.STRING_TYPE);
+        GameVars.finishedString = "";
+        targetText.setText(GameVars.targetString.substring(0, GameSettings.MAX_SHOW_LENGTH));
         firstCharacterText.setText(targetText.getText().substring(0,1));
+        finishedText.setText("");
     }
 
     static String generateRandomString(int length, RandomStringType randomStringType) {
@@ -229,6 +242,7 @@ public class GameApplication extends Application {
 
         });
 
+        stage.setResizable(false);
         stage.setScene(gameScene);
         stage.show();
     }
@@ -241,8 +255,9 @@ public class GameApplication extends Application {
             return;
         }
 
-        String targetString = targetText.getText();
-        String firstCharacter = String.valueOf(targetString.charAt(0));
+        // TODO: play some stupid mechanical keyboard sounds
+
+        String firstCharacter = String.valueOf(GameVars.targetString.charAt(0));
         if ( input.equals(firstCharacter) ) {
             correctInputAction();
         } else {
@@ -259,19 +274,38 @@ public class GameApplication extends Application {
     }
 
     static void correctInputAction() {
+        // accumulate correctCount
         GameVars.correctCount += 1;
         correctCountText.setText("Correct: " + GameVars.correctCount); // TODO: make this translatable
 
-        targetText.setText(targetText.getText().substring(1));
+        // set finishedText
+        String correctChar = targetText.getText().substring(0, 1);
+        GameVars.finishedString = GameVars.finishedString + correctChar;
+        int startIndex = GameVars.finishedString.length() - GameSettings.MAX_SHOW_LENGTH;
+        int endIndex = GameVars.finishedString.length();
+        if ( startIndex < 0 ) startIndex = 0;
+        finishedText.setText(GameVars.finishedString.substring(startIndex, endIndex));
+
+        // set targetText
+        int targetTextLength = Math.min(GameVars.targetString.length(), GameSettings.MAX_SHOW_LENGTH);
+        targetText.setText(GameVars.targetString.substring(1, targetTextLength));
+        GameVars.targetString = GameVars.targetString.substring(1);
+
+        // set the character in the middle
         if ( !targetText.getText().isEmpty() ) {
             String firstChar = targetText.getText().substring(0,1);
             firstCharacterText.setText(firstChar);
         } else {
-            // TODO: player speed relates to CPS.
-            if ( GameSettings.PLAYER_SPRITE == SpriteType.Police ) GameMap.police.moveForward(1);
-            else GameMap.thief.moveForward(1);
             setNewString();
         }
+
+        // player moves
+        if ( GameVars.correctCount % GameSettings.FORWARD_TYPES == 0 ) { // TODO: player speed relates to CPS.
+            if ( GameSettings.PLAYER_SPRITE == SpriteType.Police ) GameMap.police.moveForward(1);
+            else GameMap.thief.moveForward(1);
+        }
+
+        // if correct make the character black not red
         firstCharacterText.setFill(Color.BLACK);
     }
 
