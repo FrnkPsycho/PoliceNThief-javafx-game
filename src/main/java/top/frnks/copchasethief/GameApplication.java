@@ -54,43 +54,51 @@ public class GameApplication extends Application {
         finishedText.setTextAlignment(TextAlignment.RIGHT);
         AnchorPane.setBottomAnchor(finishedText, 50.0);
         AnchorPane.setRightAnchor(finishedText, 420.0);
+        LOGGER.info("Created finishedText");
 
         root.getChildren().add(targetText);
         targetText.setFont(stringFont);
         AnchorPane.setBottomAnchor(targetText, 50.0);
         AnchorPane.setLeftAnchor(targetText, 380.0);
+        LOGGER.info("Created targetText");
 
         root.getChildren().add(firstCharacterText);
         firstCharacterText.setFont(stringFont);
         AnchorPane.setBottomAnchor(firstCharacterText, 50.0);
         AnchorPane.setLeftAnchor(firstCharacterText, 380.0);
+        LOGGER.info("Created firstCharacterText");
 
         root.getChildren().add(cursor);
         AnchorPane.setBottomAnchor(cursor, 45.0);
         AnchorPane.setLeftAnchor(cursor, 380.0);
+        LOGGER.info("Created cursor");
 
         root.getChildren().add(timerText);
         timerText.setFont(counterFont);
         AnchorPane.setTopAnchor(timerText, 20.0);
         AnchorPane.setLeftAnchor(timerText, 10.0);
+        LOGGER.info("Created timerText");
 
         root.getChildren().add(correctCountText);
         correctCountText.setText("Correct: " + GameVars.correctCount); // TODO: make this translatable
         correctCountText.setFont(counterFont);
         AnchorPane.setTopAnchor(correctCountText, 80.0);
         AnchorPane.setLeftAnchor(correctCountText, 10.0);
+        LOGGER.info("Created correctCountText");
 
         root.getChildren().add(wrongCountText);
         wrongCountText.setText("Wrong: " + GameVars.wrongCount); // TODO: make this translatable
         wrongCountText.setFont(counterFont);
         AnchorPane.setTopAnchor(wrongCountText, 140.0);
         AnchorPane.setLeftAnchor(wrongCountText, 10.0);
+        LOGGER.info("Created wrongCountText");
 
         root.getChildren().add(cpsText);
         cpsText.setText("CPS: " + String.format("%.1f", GameVars.cps)); // TODO: make this translatable
         cpsText.setFont(counterFont);
         AnchorPane.setTopAnchor(cpsText,20.0);
         AnchorPane.setRightAnchor(cpsText, 40.0);
+        LOGGER.info("Created cpsText");
 
         GameMap.generateGameMap(GameSettings.MAP_SHAPE_TYPE);
         if ( GameSettings.MAP_SHAPE_TYPE == GameMapShapeType.Rectangle) GameVars.mapLength = GameMapShapes.RECTANGLE_POINTS;
@@ -98,12 +106,14 @@ public class GameApplication extends Application {
         root.getChildren().add(GameMap.mapPane);
         AnchorPane.setTopAnchor(GameMap.mapPane, 200.0);
         AnchorPane.setLeftAnchor(GameMap.mapPane, 112.0);
+        LOGGER.info("Created mapPane");
 
         root.getChildren().add(gameOverText);
         gameOverText.setVisible(false);
         gameOverText.setFont(counterFont);
         AnchorPane.setTopAnchor(gameOverText, 270.0);
         AnchorPane.setLeftAnchor(gameOverText, 100.0);
+        LOGGER.info("Created gameOverText");
 
         if ( GameSettings.isRandomString ) setNewString();
         else readArticleToString(GameArticle.ARTICLE_NAMES[0]);
@@ -185,11 +195,15 @@ public class GameApplication extends Application {
     }
 
     private void readArticleToString(String articleName) throws IOException {
+        LOGGER.info("Start reading article to targetString...");
         StringBuilder sb = new StringBuilder();
 
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream("assets/articles/" + articleName + ".txt");
+        LOGGER.info("Created inputStream");
         InputStreamReader streamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+        LOGGER.info("Created streamReader");
         BufferedReader br = new BufferedReader(streamReader);
+        LOGGER.info("Created bufferedReader");
         for (String line; (line = br.readLine()) != null;) {
             sb.append(line).append(" ");
         }
@@ -199,17 +213,18 @@ public class GameApplication extends Application {
         targetText.setText(GameVars.targetString.substring(0, GameSettings.MAX_SHOW_LENGTH));
         firstCharacterText.setText(targetText.getText().substring(0,1));
         finishedText.setText("");
+        LOGGER.info("Successfully read article to targetString");
     }
 
     private static void setNewString() {
-        GameVars.targetString = generateRandomString(GameSettings.STRING_LENGTH, GameSettings.STRING_TYPE);
+        GameVars.targetString = generateRandomString(GameSettings.RANDOM_STRING_LENGTH, GameSettings.STRING_TYPE);
         GameVars.finishedString = "";
         targetText.setText(GameVars.targetString.substring(0, GameSettings.MAX_SHOW_LENGTH));
         firstCharacterText.setText(targetText.getText().substring(0,1));
-        finishedText.setText("");
     }
 
     static String generateRandomString(int length, RandomStringType randomStringType) {
+        LOGGER.info("Generating random string...");
 
         StringBuilder sb = new StringBuilder();
         switch (randomStringType) {
@@ -235,6 +250,7 @@ public class GameApplication extends Application {
                 }
             }
         }
+        LOGGER.info("Random string generated: " + sb);
 
         return sb.toString();
     }
