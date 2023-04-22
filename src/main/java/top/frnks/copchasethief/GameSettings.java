@@ -12,7 +12,7 @@ public class GameSettings {
     public static final int MAX_SHOW_LENGTH = 16;
     public static final int FORWARD_TYPES = 5;
     public static final int SPRITE_SIZE = 64;
-    public static final boolean ifRandomString = false;
+    public static final boolean isRandomString = false;
     public static final SpriteType PLAYER_SPRITE = SpriteType.Police;
     public static final GameMapShapeType MAP_SHAPE_TYPE = GameMapShapeType.Rectangle;
     public static RandomStringType STRING_TYPE = RandomStringType.ALL_LOWERCASE;

@@ -8,7 +8,6 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -18,7 +17,8 @@ import top.frnks.copchasethief.type.GameMapShapeType;
 import top.frnks.copchasethief.type.RandomStringType;
 import top.frnks.copchasethief.type.SpriteType;
 
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -45,7 +45,7 @@ public class GameApplication extends Application {
     public static final Rectangle cursor = new Rectangle(24, 2);
 
     private Parent createMainMenu() {return null;} // TODO: createMainMenu method
-    private Parent createMainGame() {
+    private Parent createMainGame() throws IOException {
         root.setPrefSize(GameSettings.WINDOW_WIDTH, GameSettings.WINDOW_HEIGHT);
 
         root.getChildren().add(finishedText);
@@ -68,15 +68,6 @@ public class GameApplication extends Application {
         root.getChildren().add(cursor);
         AnchorPane.setBottomAnchor(cursor, 45.0);
         AnchorPane.setLeftAnchor(cursor, 380.0);
-
-//        root.getChildren().add(stringPane);
-//        stringPane.setPrefWrapLength(root.getPrefWidth());
-//        stringPane.getChildren().add(finishedText);
-//        Rectangle rect = new Rectangle();
-//        rect.heightProperty().bind(stringPane.heightProperty());
-//        rect.widthProperty().bind(stringPane.widthProperty());
-//        rect.setWidth(rect.getWidth() - 200);
-
 
         root.getChildren().add(timerText);
         timerText.setFont(counterFont);
@@ -101,11 +92,9 @@ public class GameApplication extends Application {
         AnchorPane.setTopAnchor(cpsText,20.0);
         AnchorPane.setRightAnchor(cpsText, 40.0);
 
-        // TODO: reconstruct map shapes
         GameMap.generateGameMap(GameSettings.MAP_SHAPE_TYPE);
         if ( GameSettings.MAP_SHAPE_TYPE == GameMapShapeType.Rectangle) GameVars.mapLength = GameMapShapes.RECTANGLE_POINTS;
-        //
-//        GameMap.generateGameMap(GameMapShapeType.Hexagon);
+
         root.getChildren().add(GameMap.mapPane);
         AnchorPane.setTopAnchor(GameMap.mapPane, 200.0);
         AnchorPane.setLeftAnchor(GameMap.mapPane, 112.0);
@@ -116,7 +105,10 @@ public class GameApplication extends Application {
         AnchorPane.setTopAnchor(gameOverText, 270.0);
         AnchorPane.setLeftAnchor(gameOverText, 100.0);
 
-        setNewString();
+        if ( GameSettings.isRandomString ) setNewString();
+        else readArticleToString(GameArticle.ARTICLE_NAMES[0]);
+
+        // renderer
         AnimationTimer timer = new AnimationTimer() {
             long last = 0;
             @Override
@@ -131,6 +123,7 @@ public class GameApplication extends Application {
 
         return root;
     }
+
 
     private List<Sprite> sprites() {
         return root.getChildren().stream().map(node -> (Sprite)node).collect(Collectors.toList());
@@ -189,6 +182,23 @@ public class GameApplication extends Application {
         if ( GameVars.timeoutGameOver ) gameOverText.setText("Times Up! The thief has gone away!");
         else if ( GameVars.caughtGameOver) gameOverText.setText("Congrats! The thief has been caught!"); // TODO: player plays as thief
         else  gameOverText.setText("I don't know what's going on, but the game is over...");
+    }
+
+    private void readArticleToString(String articleName) throws IOException {
+        StringBuilder sb = new StringBuilder();
+
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("assets/articles/" + articleName + ".txt");
+        InputStreamReader streamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+        BufferedReader br = new BufferedReader(streamReader);
+        for (String line; (line = br.readLine()) != null;) {
+            sb.append(line).append(" ");
+        }
+
+        GameVars.targetString = sb.toString();
+        GameVars.finishedString = "";
+        targetText.setText(GameVars.targetString.substring(0, GameSettings.MAX_SHOW_LENGTH));
+        firstCharacterText.setText(targetText.getText().substring(0,1));
+        finishedText.setText("");
     }
 
     private static void setNewString() {
