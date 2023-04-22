@@ -254,6 +254,12 @@ public class GameApplication extends Application {
 
         stage.setResizable(false);
         stage.setScene(gameScene);
+
+        String version = getClass().getPackage().getImplementationVersion();
+        if ( version == null ) version = "DEV";
+        else version = "v" + version;
+        stage.setTitle("PoliceNThief - " + version);
+
         stage.show();
     }
 
