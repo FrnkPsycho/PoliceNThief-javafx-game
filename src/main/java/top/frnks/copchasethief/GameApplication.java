@@ -121,14 +121,14 @@ public class GameApplication extends Application {
             GameVars.totalTimeSeconds += 1;
 
             // enemy auto forward/backward
+            GameMap.thief.setBetterDirection();
             // TODO: player act as thief
             // TODO: customizable speed
-//            if ( gameRandom.nextInt(2) == 0 ) GameMap.thief.moveForward(1);
-            GameMap.thief.setBetterDirection();
-            GameMap.police.setBetterDirection();
-            GameMap.thief.moveForward(1);
+            if ( gameRandom.nextInt(4) == 0 ) GameMap.thief.moveForward(1);
 
+//            GameMap.thief.moveForward(1);
         }
+//        GameMap.police.setBetterDirection();
 //        if ( calculateNearestDistance(GameMap.police.mapIndex, GameMap.thief.mapIndex, GameVars.mapLength) < 4 ) {
 //            // TODO: Strange behavior of thief if police nearly catch up
 //            GameMap.thief.takeTurn();
@@ -266,13 +266,13 @@ public class GameApplication extends Application {
         if ( !targetText.getText().isEmpty() ) {
             String firstChar = targetText.getText().substring(0,1);
             firstCharacterText.setText(firstChar);
-            firstCharacterText.setFill(Color.BLACK);
         } else {
             // TODO: player speed relates to CPS.
             if ( GameSettings.PLAYER_SPRITE == SpriteType.Police ) GameMap.police.moveForward(1);
             else GameMap.thief.moveForward(1);
             setNewString();
         }
+        firstCharacterText.setFill(Color.BLACK);
     }
 
     public static void main(String[] args) {

@@ -45,24 +45,27 @@ public class Sprite extends Rectangle {
     public void setBetterDirection() {
         int forwardDist = 0;
         int reverseDist = 0;
-        if ( type == SpriteType.Thief ) {
-             if ( !direction ) {
-                 forwardDist = Math.abs(GameMap.police.mapIndex + GameVars.mapLength - GameMap.thief.mapIndex);
-                 reverseDist = GameVars.mapLength - forwardDist;
-                 if ( reverseDist > forwardDist ) direction = true;
-             } else {
-                 forwardDist = Math.abs(GameMap.thief.mapIndex - GameMap.police.mapIndex);
-                 reverseDist = GameVars.mapLength - forwardDist;
-                 if ( reverseDist > forwardDist ) direction = false;
-             }
+        Sprite enemy = GameMap.thief;
+        if ( type == SpriteType.Thief ) enemy = GameMap.police;
+
+
+        if ( !direction ) { // if clockwise
+            if ( mapIndex > enemy.mapIndex ) forwardDist = GameVars.mapLength - mapIndex + enemy.mapIndex;
+            else  forwardDist = enemy.mapIndex - mapIndex;
+            reverseDist = GameVars.mapLength - forwardDist;
+        } else {
+             if ( mapIndex > enemy.mapIndex) forwardDist = mapIndex - enemy.mapIndex;
+             else forwardDist = enemy.mapIndex - mapIndex;
+             reverseDist = GameVars.mapLength - forwardDist;
         }
+        if ( reverseDist > forwardDist) takeTurn();
     }
 
-    static int calculateNearestDistance(int mapLength) {
-        int a = Math.abs(GameMap.police.mapIndex + mapLength - GameMap.thief.mapIndex);
-        int b = Math.abs(GameMap.thief.mapIndex - GameMap.police.mapIndex);
-        return Math.min(a, b);
-    }
+//    static int calculateNearestDistance(int mapLength) {
+//        int a = Math.abs(GameMap.police.mapIndex - GameMap.thief.mapIndex);
+//        int b = Math.abs(GameMap.thief.mapIndex - GameMap.police.mapIndex);
+//        return Math.min(a, b);
+//    }
 
 
 }
