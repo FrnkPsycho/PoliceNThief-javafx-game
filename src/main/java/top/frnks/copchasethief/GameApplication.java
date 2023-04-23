@@ -23,6 +23,19 @@ import java.util.logging.Logger;
 
 public class GameApplication extends Application {
     public static final Logger LOGGER = Logger.getGlobal();
+    public static AnimationTimer frameTimer = new AnimationTimer() {
+        long last = 0;
+        @Override
+        public void handle(long now) {
+            if ( now - last >= 16000000 ) {
+                // don't update if game is paused.
+                if ( !GameVars.gamePaused ) {
+                    update();
+                }
+                last = now;
+            }
+        }
+    };
     public static double enemyTimer = 0;
     public static double secondTimer = 0;
     public static double keepTimer = 0;
@@ -114,20 +127,7 @@ public class GameApplication extends Application {
         resetGame();
 
         // Frame Renderer
-        AnimationTimer timer = new AnimationTimer() {
-            long last = 0;
-            @Override
-            public void handle(long now) {
-                if ( now - last >= 16000000 ) {
-                    // don't update if game is paused.
-                    if ( !GameVars.gamePaused ) {
-                        update();
-                    }
-                    last = now;
-                }
-            }
-        };
-        timer.start();
+        frameTimer.start();
     }
 
 
@@ -152,8 +152,6 @@ public class GameApplication extends Application {
 
         // Create Game Map
         GameMap.generateGameMap(GameSettings.mapShapeType);
-        if ( GameSettings.mapShapeType == GameMapShapeType.Rectangle) GameVars.mapLength = GameMapShapes.RECTANGLE_POINTS;
-        else if ( GameSettings.mapShapeType == GameMapShapeType.Hexagon ) GameVars.mapLength = GameMapShapes.HEXAGON_POINTS;
 
         // Create Typing String
         if ( GameSettings.randomStringMode ) setNewString();

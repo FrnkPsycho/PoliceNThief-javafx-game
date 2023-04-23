@@ -28,31 +28,29 @@ public class GameMap {
     public static void generateGameMap(GameMapShapeType type) {
         LOGGER.info("Initializing GameMap...");
 
-        int points = 0;
-        String[] mapShape = new String[] { "" };
+        int points;
+        String[] mapShape;
 
-        int policeStartX = 0, policeStartY = 0;
-        int thiefStartX = 0, thiefStartY = 0;
+        int policeStartX, policeStartY;
+        int thiefStartX, thiefStartY;
         int x=0, y=0;
+
+        GameMapShapes map = null;
         if (type == GameMapShapeType.Rectangle) {
-            points = GameMapShapes.RECTANGLE_POINTS;
-            mapShape = GameMapShapes.RECTANGLE;
-            policeStartX = GameMapShapes.RECTANGLE_START[0][0];
-            policeStartY = GameMapShapes.RECTANGLE_START[0][1];
-            thiefStartX = GameMapShapes.RECTANGLE_START[1][0];
-            thiefStartY = GameMapShapes.RECTANGLE_START[1][1];
-            x = policeStartX;
-            y = policeStartY;
+            map = new RectangleMap();
         } else if ( type == GameMapShapeType.Hexagon ){
-            points = GameMapShapes.HEXAGON_POINTS;
-            mapShape = GameMapShapes.HEXAGON;
-            policeStartX = GameMapShapes.HEXAGON_START[0][0];
-            policeStartY = GameMapShapes.HEXAGON_START[0][1];
-            thiefStartX = GameMapShapes.HEXAGON_START[1][0];
-            thiefStartY = GameMapShapes.HEXAGON_START[1][1];
-            x = policeStartX;
-            y = policeStartY;
+            map = new HexagonMap();
         }
+
+        GameVars.mapLength = map.POINTS;
+        points = map.POINTS;
+        mapShape = map.SHAPE;
+        policeStartX = map.START[0][0];
+        policeStartY = map.START[0][1];
+        thiefStartX = map.START[1][0];
+        thiefStartY = map.START[1][1];
+        x = policeStartX;
+        y = policeStartY;
 
 
 //        mapPoints.add(new Point2D(x*BASE, y*BASE));

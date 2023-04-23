@@ -53,7 +53,7 @@ public class GameSettingsMenu {
         settingsBox.getChildren().add(randomStringTypeBox);
         settingsBox.getChildren().add(articleBox);
         settingsBox.getChildren().add(playerSpriteBox);
-        settingsBox.getChildren().add(mapShapeTypeBox);
+//        settingsBox.getChildren().add(mapShapeTypeBox); // TODO: setting this in runtime cause some issues.
         settingsBox.getChildren().add(buttonsBox);
 
         buttonsBox.getChildren().add(applyButton);
