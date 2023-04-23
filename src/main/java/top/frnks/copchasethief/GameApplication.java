@@ -53,9 +53,7 @@ public class GameApplication extends Application {
     public static final Text wrongCountText = new Text();
     public static final Text cpsText = new Text();
     public static final Rectangle cursor = new Rectangle(24, 2);
-    public static final Button pauseButton = new Button("Pause Game");
-    public static final Button resetButton = new Button("Reset Game");
-
+    public static final Rectangle gameBackground = new Rectangle();
 
     public static void createMainGame() throws IOException {
         mainGameRoot.setPrefSize(GameSettings.WINDOW_WIDTH, GameSettings.WINDOW_HEIGHT);
