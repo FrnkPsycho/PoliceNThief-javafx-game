@@ -152,19 +152,17 @@ public class GameApplication extends Application {
         if ( secondTimer > 1 ) {
             secondTimer = 0;
             GameVars.totalTimeSeconds += 1;
-            // enemy auto-forward/backward
-            GameMap.thief.setBetterDirection();
-
         }
+
+        // enemy auto-forward/backward
         if ( enemyTimer > GameSettings.enemySpeed ) {
             enemyTimer = 0;
-            // TODO: player act as thief
             if ( GameSettings.playerSprite == SpriteType.Police) GameMap.thief.moveForward(1);
             else GameMap.police.moveForward(1);
-
         }
 
-
+        // set direction every frame to avoid some strange behavior
+        GameMap.thief.setBetterDirection();
 
         // update timerText
         timerText.setText(String.format("%.1f", keepTimer));
@@ -205,11 +203,8 @@ public class GameApplication extends Application {
         StringBuilder sb = new StringBuilder();
 
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream("assets/articles/" + articleName + ".txt");
-        LOGGER.info("Created inputStream");
         InputStreamReader streamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
-        LOGGER.info("Created streamReader");
         BufferedReader br = new BufferedReader(streamReader);
-        LOGGER.info("Created bufferedReader");
         for (String line; (line = br.readLine()) != null;) {
             sb.append(line).append(" ");
         }
