@@ -2,7 +2,7 @@ package top.frnks.copchasethief;
 
 public class GameVars {
     public static boolean gameStart = false;
-    public static boolean gamePaused = false;
+    public static boolean gamePaused = true;
     public static long totalTimeSeconds = 0;
     public static long correctCount = 0;
     public static long wrongCount = 0;

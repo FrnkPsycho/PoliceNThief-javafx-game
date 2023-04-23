@@ -37,8 +37,8 @@ public class GameApplication extends Application {
     private static final Random gameRandom = new Random();
 
     public static final AnchorPane mainGameRoot = new AnchorPane();
-    public static final AnchorPane pauseMenuRoot = new AnchorPane();
-    public static final AnchorPane settingsMenuRoot = new AnchorPane();
+    public static final AnchorPane pauseMenuRoot = new AnchorPane(); // TODO: pause menu
+    public static final AnchorPane settingsMenuRoot = new AnchorPane(); // TODO: settings menu ( share with both main menu and pause menu)
     public static final FlowPane stringPane = new FlowPane();
     public static final Font counterFont = new Font("Noto Sans", 40);
     public static final Font stringFont = new Font("Consolas", 40);
@@ -141,7 +141,9 @@ public class GameApplication extends Application {
             @Override
             public void handle(long now) {
                 if ( now - last >= 16000000 ) {
-                    update();
+                    if ( !GameVars.gamePaused ) {
+                        update();
+                    }
                     last = now;
                 }
             }
@@ -281,19 +283,21 @@ public class GameApplication extends Application {
 
 
         GameMainMenu.createMainMenu();
-        // TODO: make main menu invisible after game start
         Scene gameScene = new Scene(GameMainMenu.mainMenuRoot);
 
         createMainGame();
-//        Scene mainGameScene = new Scene(mainGameRoot);
-//        mainMenu.getChildren().add(createMainGame());
+        GameSettingsMenu.createSettingsMenu();
         // Keyboard input
         gameScene.setOnKeyTyped(event -> {
-            if ( event.getCode() == KeyCode.ESCAPE ) {
-                // TODO: pause game
+            // TODO: It cannot accept escape key?
+            if ( event.getCode().equals(KeyCode.ESCAPE) ) {
+                LOGGER.info("Game Paused!");
+                GameVars.gamePaused = true;
+                gameScene.setRoot(GamePauseMenu.pauseMenuRoot);
             }
 
             String inputCharacter = event.getCharacter();
+            LOGGER.info("Player input: " + inputCharacter);
             inputAction(inputCharacter);
 
         });
