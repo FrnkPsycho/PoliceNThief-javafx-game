@@ -26,6 +26,7 @@ import java.util.logging.Logger;
 
 public class GameApplication extends Application {
     public static final Logger LOGGER = Logger.getGlobal();
+    public static double enemyTimer = 0;
     public static double secondTimer = 0;
     public static double keepTimer = 0;
     public static final char[] charTable = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
@@ -100,8 +101,8 @@ public class GameApplication extends Application {
         AnchorPane.setRightAnchor(cpsText, 40.0);
         LOGGER.info("Created cpsText");
 
-        GameMap.generateGameMap(GameSettings.MAP_SHAPE_TYPE);
-        if ( GameSettings.MAP_SHAPE_TYPE == GameMapShapeType.Rectangle) GameVars.mapLength = GameMapShapes.RECTANGLE_POINTS;
+        GameMap.generateGameMap(GameSettings.mapShapeType);
+        if ( GameSettings.mapShapeType == GameMapShapeType.Rectangle) GameVars.mapLength = GameMapShapes.RECTANGLE_POINTS;
 
         root.getChildren().add(GameMap.mapPane);
         AnchorPane.setTopAnchor(GameMap.mapPane, 200.0);
@@ -143,21 +144,24 @@ public class GameApplication extends Application {
         if ( GameVars.gameOver ) return;
 
         // game runs in 60fps, so timer increases approx. 0.016667 per frame
+        enemyTimer += 0.016667;
         secondTimer += 0.016667;
         keepTimer += 0.016667;
 
-        // if reach a second, clear secondTimer, add one second to totalTime
+        // if reach a second, clear enemyTimer, add one second to totalTime
         if ( secondTimer > 1 ) {
             secondTimer = 0;
             GameVars.totalTimeSeconds += 1;
-
-            // enemy auto forward/backward
+            // enemy auto-forward/backward
             GameMap.thief.setBetterDirection();
+        }
+        if ( enemyTimer > GameSettings.enemySpeed ) {
+            enemyTimer = 0;
             // TODO: player act as thief
-            // TODO: customizable speed
-            if ( gameRandom.nextInt(3) == 0 ) GameMap.thief.moveForward(1);
+            GameMap.thief.moveForward(1);
 
         }
+
 
 
         // update timerText
@@ -169,7 +173,7 @@ public class GameApplication extends Application {
 
 
         // timeout check
-        if ( GameVars.totalTimeSeconds >= GameSettings.TIMEOUT ) {
+        if ( GameVars.totalTimeSeconds >= GameSettings.timeout) {
             GameVars.gameOver = true;
             GameVars.timeoutGameOver = true;
             gameOverText.setVisible(true);
@@ -217,7 +221,7 @@ public class GameApplication extends Application {
     }
 
     private static void setNewString() {
-        GameVars.targetString = generateRandomString(GameSettings.RANDOM_STRING_LENGTH, GameSettings.STRING_TYPE);
+        GameVars.targetString = generateRandomString(GameSettings.RANDOM_STRING_LENGTH, GameSettings.stringType);
         GameVars.finishedString = "";
         targetText.setText(GameVars.targetString.substring(0, GameSettings.MAX_SHOW_LENGTH));
         firstCharacterText.setText(targetText.getText().substring(0,1));
@@ -332,8 +336,8 @@ public class GameApplication extends Application {
         }
 
         // player moves
-        if ( GameVars.correctCount % GameSettings.FORWARD_TYPES == 0 ) { // TODO: player speed relates to CPS.
-            if ( GameSettings.PLAYER_SPRITE == SpriteType.Police ) GameMap.police.moveForward(1);
+        if ( GameVars.correctCount % GameSettings.forwardTypes == 0 ) { // TODO: player speed relates to CPS.
+            if ( GameSettings.playerSprite == SpriteType.Police ) GameMap.police.moveForward(1);
             else GameMap.thief.moveForward(1);
         }
 
