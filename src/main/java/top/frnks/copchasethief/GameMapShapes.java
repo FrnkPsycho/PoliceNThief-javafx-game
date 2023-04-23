@@ -10,11 +10,13 @@ public class GameMapShapes {
     * Z C
     * */
     public static final String[] RECTANGLE = new String[] {
-            "EDDDDDDDC",
-            "W       S",
-            "QAAAAAAAZ",
+            "EDDDDDDDDDDDDDC",
+            "W             S",
+            "W             S",
+            "W             S",
+            "QAAAAAAAAAAAAAZ",
     };
-    public static final int RECTANGLE_POINTS = 20;
+    public static final int RECTANGLE_POINTS = 36;
     // Set the start point of police and thief, 0->police, 1->thief
     public static final int[][] RECTANGLE_START = new int[][] {
             {0, 0},

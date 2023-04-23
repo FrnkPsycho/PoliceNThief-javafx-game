@@ -103,6 +103,7 @@ public class GameApplication extends Application {
 
         GameMap.generateGameMap(GameSettings.mapShapeType);
         if ( GameSettings.mapShapeType == GameMapShapeType.Rectangle) GameVars.mapLength = GameMapShapes.RECTANGLE_POINTS;
+        else if ( GameSettings.mapShapeType == GameMapShapeType.Hexagon ) GameVars.mapLength = GameMapShapes.HEXAGON_POINTS;
 
         root.getChildren().add(GameMap.mapPane);
         AnchorPane.setTopAnchor(GameMap.mapPane, 200.0);
