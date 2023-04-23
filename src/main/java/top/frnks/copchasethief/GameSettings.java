@@ -11,10 +11,11 @@ public class GameSettings {
     public static final int MAX_SHOW_LENGTH = 16;
     public static final int SPRITE_SIZE = 32;
     public static int timeout = 120;
-    public static int forwardTypes = 5;
+    public static int charactersToMove = 5;
     public static double enemySpeed = 2; // moveForward every {enemySpeed} second(s)
-    public static boolean isRandomString = false;
+    public static boolean randomStringMode = false;
+    public static String articleName = GameArticle.ARTICLE_NAMES[0];
     public static SpriteType playerSprite = SpriteType.Police;
     public static GameMapShapeType mapShapeType = GameMapShapeType.Rectangle;
-    public static RandomStringType stringType = RandomStringType.ALL_LOWERCASE;
+    public static RandomStringType randomStringType = RandomStringType.ALL_LOWERCASE;
 }

@@ -4,14 +4,11 @@ import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.image.Image;
+import javafx.scene.control.Button;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -35,11 +32,7 @@ public class GameApplication extends Application {
     public static double keepTimer = 0;
     public static final char[] charTable = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
     private static final Random gameRandom = new Random();
-
-    public static final AnchorPane mainGameRoot = new AnchorPane();
-    public static final AnchorPane pauseMenuRoot = new AnchorPane(); // TODO: pause menu
-    public static final AnchorPane settingsMenuRoot = new AnchorPane(); // TODO: settings menu ( share with both main menu and pause menu)
-    public static final FlowPane stringPane = new FlowPane();
+    public static AnchorPane mainGameRoot = new AnchorPane();
     public static final Font counterFont = new Font("Noto Sans", 40);
     public static final Font stringFont = new Font("Consolas", 40);
     public static final Text targetText = new Text();
@@ -51,6 +44,8 @@ public class GameApplication extends Application {
     public static final Text wrongCountText = new Text();
     public static final Text cpsText = new Text();
     public static final Rectangle cursor = new Rectangle(24, 2);
+    public static final Button pauseButton = new Button("Pause Game");
+    public static final Button resetButton = new Button("Reset Game");
 
 
 
@@ -61,7 +56,7 @@ public class GameApplication extends Application {
 //
 //    }
 
-    private Parent createMainGame() throws IOException {
+    public static void createMainGame() throws IOException {
         mainGameRoot.setPrefSize(GameSettings.WINDOW_WIDTH, GameSettings.WINDOW_HEIGHT);
 
         mainGameRoot.getChildren().add(finishedText);
@@ -132,8 +127,22 @@ public class GameApplication extends Application {
         AnchorPane.setLeftAnchor(gameOverText, 100.0);
         LOGGER.info("Created gameOverText");
 
-        if ( GameSettings.isRandomString ) setNewString();
-        else readArticleToString(GameArticle.ARTICLE_NAMES[0]);
+//        mainGameRoot.getChildren().add(pauseButton);
+//        AnchorPane.setLeftAnchor(pauseButton, 250.0);
+//        pauseButton.setOnAction(event -> {
+//            GameVars.gamePaused = true;
+//            mainGameRoot.getScene().setRoot(GamePauseMenu.pauseMenuRoot);
+//        });
+//        LOGGER.info("Created pauseButton");
+//
+//        mainGameRoot.getChildren().add(resetButton);
+//        AnchorPane.setRightAnchor(resetButton, 250.0);
+//        resetButton.setOnAction(event -> {
+//            resetGame();
+//        });
+
+        if ( GameSettings.randomStringMode) setNewString();
+        else readArticleToString(GameSettings.articleName);
 
         // renderer
         AnimationTimer timer = new AnimationTimer() {
@@ -149,16 +158,28 @@ public class GameApplication extends Application {
             }
         };
         timer.start();
-
-        return mainGameRoot;
     }
 
 
-    private List<Sprite> sprites() {
-        return mainGameRoot.getChildren().stream().map(node -> (Sprite)node).collect(Collectors.toList());
+//    private List<Sprite> sprites() {
+//        return mainGameRoot.getChildren().stream().map(node -> (Sprite)node).collect(Collectors.toList());
+//    }
+
+    public static void pauseGame() {
+        LOGGER.info("Game Paused!");
+        GameVars.gamePaused = true;
+        GameApplication.mainGameRoot.getScene().setRoot(GamePauseMenu.pauseMenuRoot);
+    }
+    public static void resetGame() {
+        LOGGER.info("Game Reset!");
+        enemyTimer = 0;
+        keepTimer = 0;
+        secondTimer = 0;
+        GameVars.resetGameVars();
+        gameOverText.setVisible(false);
     }
 
-    private void update() {
+    private static void update() {
         if ( GameVars.gameOver ) return;
 
         // game runs in 60fps, so timer increases approx. 0.016667 per frame
@@ -216,11 +237,11 @@ public class GameApplication extends Application {
         else  gameOverText.setText("I don't know what's going on, but the game is over...");
     }
 
-    private void readArticleToString(String articleName) throws IOException {
+    private static void readArticleToString(String articleName) throws IOException {
         LOGGER.info("Start reading article to targetString...");
         StringBuilder sb = new StringBuilder();
 
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("assets/articles/" + articleName + ".txt");
+        InputStream inputStream = GameApplication.class.getClassLoader().getResourceAsStream("assets/articles/" + articleName + ".txt");
         InputStreamReader streamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
         BufferedReader br = new BufferedReader(streamReader);
         for (String line; (line = br.readLine()) != null;) {
@@ -236,7 +257,7 @@ public class GameApplication extends Application {
     }
 
     private static void setNewString() {
-        GameVars.targetString = generateRandomString(GameSettings.RANDOM_STRING_LENGTH, GameSettings.stringType);
+        GameVars.targetString = generateRandomString(GameSettings.RANDOM_STRING_LENGTH, GameSettings.randomStringType);
         GameVars.finishedString = "";
         targetText.setText(GameVars.targetString.substring(0, GameSettings.MAX_SHOW_LENGTH));
         firstCharacterText.setText(targetText.getText().substring(0,1));
@@ -285,16 +306,10 @@ public class GameApplication extends Application {
         GameMainMenu.createMainMenu();
         Scene gameScene = new Scene(GameMainMenu.mainMenuRoot);
 
-        createMainGame();
         GameSettingsMenu.createSettingsMenu();
+        GamePauseMenu.createPauseMenu();
         // Keyboard input
         gameScene.setOnKeyTyped(event -> {
-            // TODO: It cannot accept escape key?
-            if ( event.getCode().equals(KeyCode.ESCAPE) ) {
-                LOGGER.info("Game Paused!");
-                GameVars.gamePaused = true;
-                gameScene.setRoot(GamePauseMenu.pauseMenuRoot);
-            }
 
             String inputCharacter = event.getCharacter();
             LOGGER.info("Player input: " + inputCharacter);
@@ -307,9 +322,14 @@ public class GameApplication extends Application {
     }
 
     static void inputAction(String input) {
+        if ( input.equals(KeyCode.ESCAPE.getChar()) ) {
+            LOGGER.info("Game Paused!");
+            pauseGame();
+            return;
+        }
         if (GameVars.gameOver) {
             if ( input.equals("r") ) {
-                // TODO: reset the game
+                resetGame();
             }
             return;
         }
@@ -359,7 +379,7 @@ public class GameApplication extends Application {
         }
 
         // player moves
-        if ( GameVars.correctCount % GameSettings.forwardTypes == 0 ) { // TODO: player speed relates to CPS.
+        if ( GameVars.correctCount % GameSettings.charactersToMove == 0 ) { // TODO: player speed relates to CPS.
             if ( GameSettings.playerSprite == SpriteType.Police ) GameMap.police.moveForward(1);
             else GameMap.thief.moveForward(1);
         }

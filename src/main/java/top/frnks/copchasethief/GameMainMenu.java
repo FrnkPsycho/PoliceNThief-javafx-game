@@ -7,6 +7,8 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
 
+import java.io.IOException;
+
 public class GameMainMenu {
     public static final AnchorPane mainMenuRoot = new AnchorPane();
     public static final Rectangle mainMenuBackground = new Rectangle();
@@ -29,6 +31,13 @@ public class GameMainMenu {
 //        AnchorPane.setLeftAnchor(startGameButton, 240.0);
         startGameButton.setOnAction(event -> {
             GameVars.gamePaused = false;
+            GameApplication.mainGameRoot = new AnchorPane();
+            GameApplication.resetGame();
+            try {
+                GameApplication.createMainGame();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
             mainMenuRoot.getScene().setRoot(GameApplication.mainGameRoot);
         });
         settingsMenuButton.setOnAction(event -> {
