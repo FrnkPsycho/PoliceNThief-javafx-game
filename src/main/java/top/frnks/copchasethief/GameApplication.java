@@ -205,7 +205,8 @@ public class GameApplication extends Application {
 
         // catch check
         if ( GameMap.police.mapIndex == GameMap.thief.mapIndex ) {
-            GameMap.police.setFill(Color.GREEN);
+//            GameMap.police.setFill(Color.GREEN);
+            // TODO: caught texture
             GameVars.gameOver = true;
             GameVars.caughtGameOver = true;
             gameOverText.setVisible(true);

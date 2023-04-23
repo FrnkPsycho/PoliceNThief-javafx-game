@@ -1,6 +1,8 @@
 package top.frnks.copchasethief;
 
+import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
 import top.frnks.copchasethief.type.SpriteType;
 
@@ -16,6 +18,7 @@ public class Sprite extends Rectangle {
         this.mapIndex = mapIndex;
         setTranslateX(x);
         setTranslateY(y);
+        setTexture();
     }
 
     public void moveForward(int step) {
@@ -58,6 +61,16 @@ public class Sprite extends Rectangle {
              reverseDist = GameVars.mapLength - forwardDist;
         }
         if ( reverseDist > forwardDist) takeTurn();
+    }
+
+    public void setTexture() {
+        String spriteName = "";
+        switch (type) {
+            case Police -> spriteName = "police";
+            case Thief -> spriteName = "thief";
+        }
+        var asset = getClass().getClassLoader().getResourceAsStream("assets/textures/"+spriteName+".png");
+        setFill(new ImagePattern(new Image(asset)));
     }
 
 //    static int calculateNearestDistance(int mapLength) {

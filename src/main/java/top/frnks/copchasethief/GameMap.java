@@ -1,12 +1,16 @@
 package top.frnks.copchasethief;
 
 import javafx.geometry.Point2D;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
 import top.frnks.copchasethief.type.GameMapShapeType;
 import top.frnks.copchasethief.type.SpriteType;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -49,35 +53,53 @@ public class GameMap {
         }
 
 
-        mapPoints.add(new Point2D(x*BASE, y*BASE));
-        for ( int acc=1 ; acc < points; acc++ ) {
+//        mapPoints.add(new Point2D(x*BASE, y*BASE));
+        for ( int acc=0 ; acc < points; acc++ ) {
+            String roadDirection = "";
+            double rotate = 0;
+            var p = new Point2D(x * BASE, y * BASE);
+            LOGGER.info(p.toString());
+            mapPoints.add(p);
+
+
+
+
             char mark = mapShape[y].charAt(x);
             switch (mark) {
                 // TODO: make map point contains corner data?
-                case 'D' -> x++;
-                case 'S' -> y++;
-                case 'A' -> x--;
-                case 'W' -> y--;
-                case 'Q' -> { x--; y--;}
-                case 'E' -> { x++; y--;}
-                case 'C' -> { x++; y++;}
-                case 'Z' -> { x--; y++;}
+                case 'D' -> { x++; roadDirection = "horizontal";}
+                case 'S' -> { y++; roadDirection = "vertical";}
+                case 'A' -> { x--; roadDirection = "horizontal";}
+                case 'W' -> { y--; roadDirection = "vertical";}
+                case 'Q' -> { x--; y--; rotate = -90;}
+                case 'E' -> { x++; y--; rotate = 0;}
+                case 'C' -> { x++; y++; rotate = 90;}
+                case 'Z' -> { x--; y++; rotate = 180;}
             }
+
             if ( y<0 ) y = 0;
             if ( x<0 ) x = 0;
             if ( y>mapShape.length-1) y = mapShape.length-1;
             if ( x>mapShape[y].length()-1) x = mapShape[y].length()-1;
-            var p = new Point2D(x * BASE, y * BASE);
-            LOGGER.info(p.toString());
-            mapPoints.add(p);
+
+            Rectangle road = new Rectangle(p.getX(), p.getY(), BASE, BASE);
+
+            InputStream asset = null;
+            if ( roadDirection.isEmpty() ) asset = GameApplication.class.getClassLoader().getResourceAsStream("assets/textures/road_corner.png");
+            else asset = GameApplication.class.getClassLoader().getResourceAsStream("assets/textures/road_" + roadDirection + ".png");
+            var img = new ImagePattern(new Image(asset));
+            road.setFill(img);
+            road.setRotate(rotate);
+            mapPane.getChildren().add(road);
+
         }
 
-        for (Point2D p : mapPoints) {
-            Rectangle roadShape = new Rectangle(p.getX(), p.getY(), BASE, BASE);
-            roadShape.setFill(Color.GRAY);
-            roadShape.setOpacity(80.0);
-            mapPane.getChildren().add(roadShape);
-        }
+//        for (Point2D p : mapPoints) {
+//            Rectangle roadShape = new Rectangle(p.getX(), p.getY(), BASE, BASE);
+//            roadShape.setFill(Color.GRAY);
+//            roadShape.setOpacity(80.0);
+//            mapPane.getChildren().add(roadShape);
+//        }
 
         int thiefIndex = findSpriteMapIndex(thiefStartX*BASE, thiefStartY*BASE);
         thief = new Sprite(thiefStartX*BASE, thiefStartY*BASE, BASE, BASE, thiefIndex, SpriteType.Thief, Color.RED);
