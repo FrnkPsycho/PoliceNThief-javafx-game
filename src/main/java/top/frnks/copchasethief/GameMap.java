@@ -4,6 +4,7 @@ import javafx.geometry.Point2D;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.RowConstraints;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
@@ -13,6 +14,7 @@ import top.frnks.copchasethief.type.SpriteType;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.logging.Logger;
 
 public class GameMap {
@@ -63,7 +65,7 @@ public class GameMap {
 
 
 
-
+            boolean isFill = false;
             char mark = mapShape[y].charAt(x);
             switch (mark) {
                 // TODO: make map point contains corner data?
@@ -75,6 +77,7 @@ public class GameMap {
                 case 'E' -> { x++; y--; rotate = 0;}
                 case 'C' -> { x++; y++; rotate = 90;}
                 case 'Z' -> { x--; y++; rotate = 180;}
+                case ' ' -> { isFill = true;}
             }
 
             if ( y<0 ) y = 0;
@@ -82,15 +85,20 @@ public class GameMap {
             if ( y>mapShape.length-1) y = mapShape.length-1;
             if ( x>mapShape[y].length()-1) x = mapShape[y].length()-1;
 
-            Rectangle road = new Rectangle(p.getX(), p.getY(), BASE, BASE);
+            Rectangle mapSprite = new Rectangle(p.getX(), p.getY(), BASE, BASE);
 
             InputStream asset = null;
-            if ( roadDirection.isEmpty() ) asset = GameApplication.class.getClassLoader().getResourceAsStream("assets/textures/road_corner.png");
+            if ( isFill ) {
+                int index = new Random().nextInt(1, GameSettings.FILL_TEXTURES);
+                asset = GameApplication.class.getClassLoader().getResourceAsStream("assets/textures/fill_" + index + ".png");
+            }
+            else if ( roadDirection.isEmpty() ) asset = GameApplication.class.getClassLoader().getResourceAsStream("assets/textures/road_corner.png");
             else asset = GameApplication.class.getClassLoader().getResourceAsStream("assets/textures/road_" + roadDirection + ".png");
+
             var img = new ImagePattern(new Image(asset));
-            road.setFill(img);
-            road.setRotate(rotate);
-            mapPane.getChildren().add(road);
+            mapSprite.setFill(img);
+            mapSprite.setRotate(rotate);
+            mapPane.getChildren().add(mapSprite);
 
         }
 
