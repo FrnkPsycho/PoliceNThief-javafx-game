@@ -154,11 +154,13 @@ public class GameApplication extends Application {
             GameVars.totalTimeSeconds += 1;
             // enemy auto-forward/backward
             GameMap.thief.setBetterDirection();
+
         }
         if ( enemyTimer > GameSettings.enemySpeed ) {
             enemyTimer = 0;
             // TODO: player act as thief
-            GameMap.thief.moveForward(1);
+            if ( GameSettings.playerSprite == SpriteType.Police) GameMap.thief.moveForward(1);
+            else GameMap.police.moveForward(1);
 
         }
 

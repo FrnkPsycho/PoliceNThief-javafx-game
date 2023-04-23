@@ -25,7 +25,6 @@ public class Sprite extends Rectangle {
 //                takeTurn();
 //            }
 //        }
-
         if (direction) nextIndex = (mapIndex - step);
         else nextIndex = (mapIndex + step);
 
