@@ -57,27 +57,21 @@ public class GameMap {
 
 //        mapPoints.add(new Point2D(x*BASE, y*BASE));
         for ( int acc=0 ; acc < points; acc++ ) {
-            String roadDirection = "";
-            double rotate = 0;
             var p = new Point2D(x * BASE, y * BASE);
             LOGGER.info(p.toString());
             mapPoints.add(p);
 
-
-
-            boolean isFill = false;
             char mark = mapShape[y].charAt(x);
             switch (mark) {
                 // TODO: make map point contains corner data?
-                case 'D' -> { x++; roadDirection = "horizontal";}
-                case 'S' -> { y++; roadDirection = "vertical";}
-                case 'A' -> { x--; roadDirection = "horizontal";}
-                case 'W' -> { y--; roadDirection = "vertical";}
-                case 'Q' -> { x--; y--; rotate = -90;}
-                case 'E' -> { x++; y--; rotate = 0;}
-                case 'C' -> { x++; y++; rotate = 90;}
-                case 'Z' -> { x--; y++; rotate = 180;}
-                case ' ' -> { isFill = true;}
+                case 'D' -> { x++; }
+                case 'S' -> { y++; }
+                case 'A' -> { x--; }
+                case 'W' -> { y--; }
+                case 'Q' -> { x--; y--;}
+                case 'E' -> { x++; y--;}
+                case 'C' -> { x++; y++;}
+                case 'Z' -> { x--; y++;}
             }
 
             if ( y<0 ) y = 0;
@@ -85,20 +79,40 @@ public class GameMap {
             if ( y>mapShape.length-1) y = mapShape.length-1;
             if ( x>mapShape[y].length()-1) x = mapShape[y].length()-1;
 
-            Rectangle mapSprite = new Rectangle(p.getX(), p.getY(), BASE, BASE);
+        }
 
-            InputStream asset = null;
-            if ( isFill ) {
-                int index = new Random().nextInt(1, GameSettings.FILL_TEXTURES);
-                asset = GameApplication.class.getClassLoader().getResourceAsStream("assets/textures/fill_" + index + ".png");
+        for (int i=0; i<mapShape.length; i++ ) {
+            for ( int j=0; j < mapShape[i].length(); j++ ) {
+                Point2D p = new Point2D(j*BASE, i*BASE);
+                String roadDirection = "";
+                double rotate = 0;
+                boolean isFill = false;
+                char mark = mapShape[i].charAt(j);
+                switch (mark) {
+                    case 'D', 'A' -> {roadDirection = "horizontal";}
+                    case 'S', 'W' -> {roadDirection = "vertical";}
+                    case 'Q' -> {rotate = -90;}
+                    case 'E' -> {rotate = 0;}
+                    case 'C' -> {rotate = 90;}
+                    case 'Z' -> {rotate = 180;}
+                    case ' ' -> { isFill = true;}
+                }
+
+                Rectangle mapSprite = new Rectangle(p.getX(), p.getY(), BASE, BASE);
+
+                InputStream asset = null;
+                if ( isFill ) {
+                    int index = new Random().nextInt(1, GameSettings.FILL_TEXTURES+1);
+                    asset = GameApplication.class.getClassLoader().getResourceAsStream("assets/textures/fill_" + index + ".png");
+                }
+                else if ( roadDirection.isEmpty() ) asset = GameApplication.class.getClassLoader().getResourceAsStream("assets/textures/road_corner.png");
+                else asset = GameApplication.class.getClassLoader().getResourceAsStream("assets/textures/road_" + roadDirection + ".png");
+
+                var img = new ImagePattern(new Image(asset));
+                mapSprite.setFill(img);
+                mapSprite.setRotate(rotate);
+                mapPane.getChildren().add(mapSprite);
             }
-            else if ( roadDirection.isEmpty() ) asset = GameApplication.class.getClassLoader().getResourceAsStream("assets/textures/road_corner.png");
-            else asset = GameApplication.class.getClassLoader().getResourceAsStream("assets/textures/road_" + roadDirection + ".png");
-
-            var img = new ImagePattern(new Image(asset));
-            mapSprite.setFill(img);
-            mapSprite.setRotate(rotate);
-            mapPane.getChildren().add(mapSprite);
 
         }
 
