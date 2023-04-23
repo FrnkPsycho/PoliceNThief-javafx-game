@@ -81,30 +81,22 @@ public class GameApplication extends Application {
         LOGGER.info("Created timerText");
 
         mainGameRoot.getChildren().add(correctCountText);
-        correctCountText.setText("Correct: " + GameVars.correctCount); // TODO: make this translatable
         correctCountText.setFont(counterFont);
         AnchorPane.setTopAnchor(correctCountText, 80.0);
         AnchorPane.setLeftAnchor(correctCountText, 10.0);
         LOGGER.info("Created correctCountText");
 
         mainGameRoot.getChildren().add(wrongCountText);
-        wrongCountText.setText("Wrong: " + GameVars.wrongCount); // TODO: make this translatable
         wrongCountText.setFont(counterFont);
         AnchorPane.setTopAnchor(wrongCountText, 140.0);
         AnchorPane.setLeftAnchor(wrongCountText, 10.0);
         LOGGER.info("Created wrongCountText");
 
         mainGameRoot.getChildren().add(cpsText);
-        cpsText.setText("CPS: " + String.format("%.1f", GameVars.cps)); // TODO: make this translatable
         cpsText.setFont(counterFont);
         AnchorPane.setTopAnchor(cpsText,20.0);
         AnchorPane.setRightAnchor(cpsText, 40.0);
         LOGGER.info("Created cpsText");
-
-        // Create Game Map
-        GameMap.generateGameMap(GameSettings.mapShapeType);
-        if ( GameSettings.mapShapeType == GameMapShapeType.Rectangle) GameVars.mapLength = GameMapShapes.RECTANGLE_POINTS;
-        else if ( GameSettings.mapShapeType == GameMapShapeType.Hexagon ) GameVars.mapLength = GameMapShapes.HEXAGON_POINTS;
 
         mainGameRoot.getChildren().add(GameMap.mapPane);
         AnchorPane.setTopAnchor(GameMap.mapPane, 200.0);
@@ -119,9 +111,7 @@ public class GameApplication extends Application {
         AnchorPane.setLeftAnchor(gameOverText, 100.0);
         LOGGER.info("Created gameOverText");
 
-        // Create Typing String
-        if ( GameSettings.randomStringMode) setNewString();
-        else readArticleToString(GameSettings.articleName);
+        resetGame();
 
         // Frame Renderer
         AnimationTimer timer = new AnimationTimer() {
@@ -156,6 +146,20 @@ public class GameApplication extends Application {
         keepTimer = 0;
         secondTimer = 0;
         GameVars.resetGameVars();
+        correctCountText.setText("Correct: " + GameVars.correctCount); // TODO: make this translatable
+        wrongCountText.setText("Wrong: " + GameVars.wrongCount); // TODO: make this translatable
+        cpsText.setText("CPS: " + String.format("%.1f", GameVars.cps)); // TODO: make this translatable
+
+        // Create Game Map
+        GameMap.generateGameMap(GameSettings.mapShapeType);
+        if ( GameSettings.mapShapeType == GameMapShapeType.Rectangle) GameVars.mapLength = GameMapShapes.RECTANGLE_POINTS;
+        else if ( GameSettings.mapShapeType == GameMapShapeType.Hexagon ) GameVars.mapLength = GameMapShapes.HEXAGON_POINTS;
+
+        // Create Typing String
+        if ( GameSettings.randomStringMode ) setNewString();
+        else readArticleToString(GameSettings.articleName);
+
+        firstCharacterText.setFill(Color.BLACK);
         gameOverText.setVisible(false);
     }
 
@@ -217,15 +221,19 @@ public class GameApplication extends Application {
         else  gameOverText.setText("I don't know what's going on, but the game is over...");
     }
 
-    private static void readArticleToString(String articleName) throws IOException {
+    private static void readArticleToString(String articleName) {
         LOGGER.info("Start reading article to targetString...");
         StringBuilder sb = new StringBuilder();
 
         InputStream inputStream = GameApplication.class.getClassLoader().getResourceAsStream("assets/articles/" + articleName + ".txt");
         InputStreamReader streamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
         BufferedReader br = new BufferedReader(streamReader);
-        for (String line; (line = br.readLine()) != null;) {
-            sb.append(line).append(" ");
+        try {
+            for (String line; (line = br.readLine()) != null;) {
+                sb.append(line).append(" ");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         GameVars.targetString = sb.toString();
@@ -239,6 +247,7 @@ public class GameApplication extends Application {
     private static void setNewString() {
         GameVars.targetString = generateRandomString(GameSettings.RANDOM_STRING_LENGTH, GameSettings.randomStringType);
         GameVars.finishedString = "";
+        firstCharacterText.setText("");
         targetText.setText(GameVars.targetString.substring(0, GameSettings.MAX_SHOW_LENGTH));
         firstCharacterText.setText(targetText.getText().substring(0,1));
     }
