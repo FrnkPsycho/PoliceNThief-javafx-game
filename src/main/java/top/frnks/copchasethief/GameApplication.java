@@ -4,10 +4,14 @@ import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -31,7 +35,10 @@ public class GameApplication extends Application {
     public static double keepTimer = 0;
     public static final char[] charTable = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
     private static final Random gameRandom = new Random();
-    public static final AnchorPane root = new AnchorPane();
+
+    public static final AnchorPane mainGameRoot = new AnchorPane();
+    public static final AnchorPane pauseMenuRoot = new AnchorPane();
+    public static final AnchorPane settingsMenuRoot = new AnchorPane();
     public static final FlowPane stringPane = new FlowPane();
     public static final Font counterFont = new Font("Noto Sans", 40);
     public static final Font stringFont = new Font("Consolas", 40);
@@ -45,11 +52,19 @@ public class GameApplication extends Application {
     public static final Text cpsText = new Text();
     public static final Rectangle cursor = new Rectangle(24, 2);
 
-    private Parent createMainMenu() {return null;} // TODO: createMainMenu method
-    private Parent createMainGame() throws IOException {
-        root.setPrefSize(GameSettings.WINDOW_WIDTH, GameSettings.WINDOW_HEIGHT);
 
-        root.getChildren().add(finishedText);
+
+//    private Parent createPauseMenu() {
+//
+//    }
+//    private Parent createSettingsMenu() {
+//
+//    }
+
+    private Parent createMainGame() throws IOException {
+        mainGameRoot.setPrefSize(GameSettings.WINDOW_WIDTH, GameSettings.WINDOW_HEIGHT);
+
+        mainGameRoot.getChildren().add(finishedText);
         finishedText.setFont(stringFont);
         finishedText.setFill(Color.GRAY);
         finishedText.setTextAlignment(TextAlignment.RIGHT);
@@ -57,44 +72,44 @@ public class GameApplication extends Application {
         AnchorPane.setRightAnchor(finishedText, 420.0);
         LOGGER.info("Created finishedText");
 
-        root.getChildren().add(targetText);
+        mainGameRoot.getChildren().add(targetText);
         targetText.setFont(stringFont);
         AnchorPane.setBottomAnchor(targetText, 50.0);
         AnchorPane.setLeftAnchor(targetText, 380.0);
         LOGGER.info("Created targetText");
 
-        root.getChildren().add(firstCharacterText);
+        mainGameRoot.getChildren().add(firstCharacterText);
         firstCharacterText.setFont(stringFont);
         AnchorPane.setBottomAnchor(firstCharacterText, 50.0);
         AnchorPane.setLeftAnchor(firstCharacterText, 380.0);
         LOGGER.info("Created firstCharacterText");
 
-        root.getChildren().add(cursor);
+        mainGameRoot.getChildren().add(cursor);
         AnchorPane.setBottomAnchor(cursor, 45.0);
         AnchorPane.setLeftAnchor(cursor, 380.0);
         LOGGER.info("Created cursor");
 
-        root.getChildren().add(timerText);
+        mainGameRoot.getChildren().add(timerText);
         timerText.setFont(counterFont);
         AnchorPane.setTopAnchor(timerText, 20.0);
         AnchorPane.setLeftAnchor(timerText, 10.0);
         LOGGER.info("Created timerText");
 
-        root.getChildren().add(correctCountText);
+        mainGameRoot.getChildren().add(correctCountText);
         correctCountText.setText("Correct: " + GameVars.correctCount); // TODO: make this translatable
         correctCountText.setFont(counterFont);
         AnchorPane.setTopAnchor(correctCountText, 80.0);
         AnchorPane.setLeftAnchor(correctCountText, 10.0);
         LOGGER.info("Created correctCountText");
 
-        root.getChildren().add(wrongCountText);
+        mainGameRoot.getChildren().add(wrongCountText);
         wrongCountText.setText("Wrong: " + GameVars.wrongCount); // TODO: make this translatable
         wrongCountText.setFont(counterFont);
         AnchorPane.setTopAnchor(wrongCountText, 140.0);
         AnchorPane.setLeftAnchor(wrongCountText, 10.0);
         LOGGER.info("Created wrongCountText");
 
-        root.getChildren().add(cpsText);
+        mainGameRoot.getChildren().add(cpsText);
         cpsText.setText("CPS: " + String.format("%.1f", GameVars.cps)); // TODO: make this translatable
         cpsText.setFont(counterFont);
         AnchorPane.setTopAnchor(cpsText,20.0);
@@ -105,12 +120,12 @@ public class GameApplication extends Application {
         if ( GameSettings.mapShapeType == GameMapShapeType.Rectangle) GameVars.mapLength = GameMapShapes.RECTANGLE_POINTS;
         else if ( GameSettings.mapShapeType == GameMapShapeType.Hexagon ) GameVars.mapLength = GameMapShapes.HEXAGON_POINTS;
 
-        root.getChildren().add(GameMap.mapPane);
+        mainGameRoot.getChildren().add(GameMap.mapPane);
         AnchorPane.setTopAnchor(GameMap.mapPane, 200.0);
         AnchorPane.setLeftAnchor(GameMap.mapPane, 112.0);
         LOGGER.info("Created mapPane");
 
-        root.getChildren().add(gameOverText);
+        mainGameRoot.getChildren().add(gameOverText);
         gameOverText.setVisible(false);
         gameOverText.setFont(counterFont);
         AnchorPane.setTopAnchor(gameOverText, 270.0);
@@ -133,12 +148,12 @@ public class GameApplication extends Application {
         };
         timer.start();
 
-        return root;
+        return mainGameRoot;
     }
 
 
     private List<Sprite> sprites() {
-        return root.getChildren().stream().map(node -> (Sprite)node).collect(Collectors.toList());
+        return mainGameRoot.getChildren().stream().map(node -> (Sprite)node).collect(Collectors.toList());
     }
 
     private void update() {
@@ -258,26 +273,32 @@ public class GameApplication extends Application {
     }
     @Override
     public void start(Stage stage) throws IOException {
-        StackPane stack = new StackPane();
-        stack.getChildren().add(createMainGame());
-//        stack.getChildren().add(createMainMenu()); TODO: make main menu invisible after game start
-        Scene gameScene = new Scene(stack);
+        String version = getClass().getPackage().getImplementationVersion();
+        if ( version == null ) version = "DEV";
+        else version = "v" + version;
+        stage.setTitle("PoliceNThief - " + version);
+        stage.setResizable(false);
 
+
+        GameMainMenu.createMainMenu();
+        // TODO: make main menu invisible after game start
+        Scene gameScene = new Scene(GameMainMenu.mainMenuRoot);
+
+        createMainGame();
+//        Scene mainGameScene = new Scene(mainGameRoot);
+//        mainMenu.getChildren().add(createMainGame());
         // Keyboard input
         gameScene.setOnKeyTyped(event -> {
+            if ( event.getCode() == KeyCode.ESCAPE ) {
+                // TODO: pause game
+            }
+
             String inputCharacter = event.getCharacter();
             inputAction(inputCharacter);
 
         });
 
-        stage.setResizable(false);
         stage.setScene(gameScene);
-
-        String version = getClass().getPackage().getImplementationVersion();
-        if ( version == null ) version = "DEV";
-        else version = "v" + version;
-        stage.setTitle("PoliceNThief - " + version);
-
         stage.show();
     }
 
