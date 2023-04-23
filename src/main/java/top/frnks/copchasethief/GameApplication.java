@@ -2,12 +2,10 @@ package top.frnks.copchasethief;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.FlowPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
@@ -20,9 +18,7 @@ import top.frnks.copchasethief.type.SpriteType;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 import java.util.logging.Logger;
 
 public class GameApplication extends Application {
@@ -48,17 +44,10 @@ public class GameApplication extends Application {
     public static final Button resetButton = new Button("Reset Game");
 
 
-
-//    private Parent createPauseMenu() {
-//
-//    }
-//    private Parent createSettingsMenu() {
-//
-//    }
-
     public static void createMainGame() throws IOException {
         mainGameRoot.setPrefSize(GameSettings.WINDOW_WIDTH, GameSettings.WINDOW_HEIGHT);
 
+        // Create Typing UI
         mainGameRoot.getChildren().add(finishedText);
         finishedText.setFont(stringFont);
         finishedText.setFill(Color.GRAY);
@@ -84,6 +73,7 @@ public class GameApplication extends Application {
         AnchorPane.setLeftAnchor(cursor, 380.0);
         LOGGER.info("Created cursor");
 
+        // Create Counters UI
         mainGameRoot.getChildren().add(timerText);
         timerText.setFont(counterFont);
         AnchorPane.setTopAnchor(timerText, 20.0);
@@ -111,6 +101,7 @@ public class GameApplication extends Application {
         AnchorPane.setRightAnchor(cpsText, 40.0);
         LOGGER.info("Created cpsText");
 
+        // Create Game Map
         GameMap.generateGameMap(GameSettings.mapShapeType);
         if ( GameSettings.mapShapeType == GameMapShapeType.Rectangle) GameVars.mapLength = GameMapShapes.RECTANGLE_POINTS;
         else if ( GameSettings.mapShapeType == GameMapShapeType.Hexagon ) GameVars.mapLength = GameMapShapes.HEXAGON_POINTS;
@@ -120,6 +111,7 @@ public class GameApplication extends Application {
         AnchorPane.setLeftAnchor(GameMap.mapPane, 112.0);
         LOGGER.info("Created mapPane");
 
+        // Create Game Over Alert
         mainGameRoot.getChildren().add(gameOverText);
         gameOverText.setVisible(false);
         gameOverText.setFont(counterFont);
@@ -127,29 +119,17 @@ public class GameApplication extends Application {
         AnchorPane.setLeftAnchor(gameOverText, 100.0);
         LOGGER.info("Created gameOverText");
 
-//        mainGameRoot.getChildren().add(pauseButton);
-//        AnchorPane.setLeftAnchor(pauseButton, 250.0);
-//        pauseButton.setOnAction(event -> {
-//            GameVars.gamePaused = true;
-//            mainGameRoot.getScene().setRoot(GamePauseMenu.pauseMenuRoot);
-//        });
-//        LOGGER.info("Created pauseButton");
-//
-//        mainGameRoot.getChildren().add(resetButton);
-//        AnchorPane.setRightAnchor(resetButton, 250.0);
-//        resetButton.setOnAction(event -> {
-//            resetGame();
-//        });
-
+        // Create Typing String
         if ( GameSettings.randomStringMode) setNewString();
         else readArticleToString(GameSettings.articleName);
 
-        // renderer
+        // Frame Renderer
         AnimationTimer timer = new AnimationTimer() {
             long last = 0;
             @Override
             public void handle(long now) {
                 if ( now - last >= 16000000 ) {
+                    // don't update if game is paused.
                     if ( !GameVars.gamePaused ) {
                         update();
                     }
@@ -295,20 +275,19 @@ public class GameApplication extends Application {
         return sb.toString();
     }
     @Override
-    public void start(Stage stage) throws IOException {
+    public void start(Stage stage) {
         String version = getClass().getPackage().getImplementationVersion();
         if ( version == null ) version = "DEV";
         else version = "v" + version;
         stage.setTitle("PoliceNThief - " + version);
         stage.setResizable(false);
 
-
         GameMainMenu.createMainMenu();
-        Scene gameScene = new Scene(GameMainMenu.mainMenuRoot);
-
         GameSettingsMenu.createSettingsMenu();
         GamePauseMenu.createPauseMenu();
-        // Keyboard input
+
+        Scene gameScene = new Scene(GameMainMenu.mainMenuRoot);
+        // Keyboard event listener
         gameScene.setOnKeyTyped(event -> {
 
             String inputCharacter = event.getCharacter();
